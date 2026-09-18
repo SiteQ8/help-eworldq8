@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eWorld Help :: computer, laptop and website help in Kuwait</title>
+<meta name="description" content="Everyday computing help. We build and check websites, fix laptops and desktops, recover files and set things up. Tell us what is happening and we will tell you what it usually is.">
+<link rel="canonical" href="https://siteq8.github.io/help-eworldq8/">
+<meta name="theme-color" content="#0f4c81">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://siteq8.github.io/help-eworldq8/">
+<meta property="og:title" content="eWorld Help">
+<meta property="og:description" content="Computer, laptop and website help. Tell us what is happening and we will tell you what it usually is.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="shell top-in">
+    <a class="brand" href="./"><b>eWorld</b> Help</a>
+    <a class="cta" href="#ask">Get help</a>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="shell">
+      <h1>Something broken? Start here.</h1>
+      <p class="lede">Laptops, desktops, phones and websites. Tell us what is
+        happening in your own words and we will tell you what it usually is,
+        what you can try yourself, and when it needs to come in.</p>
+      <a class="btn btn-lg" href="#ask">Tell us what is wrong</a>
+      <p class="fine">Free to ask. No charge until you agree to the work.</p>
+    </div>
+  </section>
+
+  <!-- ================= triage ================= -->
+  <section class="ask" id="ask">
+    <div class="shell">
+      <p class="kicker">Not sure what is wrong?</p>
+      <h2>Two questions.</h2>
+
+      <div class="q" id="q1">
+        <p class="q-label">What are we looking at?</p>
+        <div class="opts" id="devices"></div>
+      </div>
+
+      <div class="q" id="q2" hidden>
+        <p class="q-label">What is it doing?</p>
+        <div class="opts" id="symptoms"></div>
+        <button class="back" id="back" type="button">Back</button>
+      </div>
+
+      <div class="result" id="result" hidden></div>
+    </div>
+  </section>
+
+  <!-- ================= services ================= -->
+  <section class="block" id="services">
+    <div class="shell">
+      <p class="kicker">What we do</p>
+      <h2>Six things, done properly.</h2>
+      <ul class="svcs" id="svcs"></ul>
+    </div>
+  </section>
+
+  <!-- ================= how ================= -->
+  <section class="block alt" id="how">
+    <div class="shell">
+      <p class="kicker">How it works</p>
+      <h2>No surprises.</h2>
+      <ol class="steps">
+        <li><b>Tell us what is happening.</b> Email, or use the two questions
+          above. Photos of any error message help more than you would think.</li>
+        <li><b>We tell you what it is and what it costs.</b> Before any work
+          starts, not after. If it is not worth repairing we will say so.</li>
+        <li><b>You decide.</b> If you say no, you pay nothing. If you say yes,
+          the price does not move unless we find something new and ask you first.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= contact ================= -->
+  <section class="block" id="contact">
+    <div class="shell">
+      <p class="kicker">Get in touch</p>
+      <h2>Tell us what is happening.</h2>
+      <div class="contact" id="contact-list"></div>
+      <p class="fine" id="contact-note"></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="shell foot-in">
+    <p><b>eWorld</b> Help</p>
+    <p>Kuwait</p>
+  </div>
+</footer>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
