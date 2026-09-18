@@ -1,8 +1,8 @@
-/* help.eworldq8.com :: page and triage
-   The triage is a two step decision tree. It says "usually" rather than
-   "is", because a page cannot diagnose a machine it cannot see, and telling
-   somebody their drive has failed when it has not is worse than telling them
-   nothing. */
+/* help.eworldq8.com :: page, language and triage
+   Every visible string comes from UI or the content data, so a language
+   switch is a re-render rather than a second copy of the page to keep in
+   step. Arabic sets dir on the document and the layout follows, because the
+   stylesheet uses logical properties throughout. */
 
 (function () {
   "use strict";
@@ -10,46 +10,81 @@
   const $ = (s) => document.querySelector(s);
   const el = (t, c, x) => { const n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; };
 
+  let lang = "en";
+  try { const v = localStorage.getItem("help-lang"); if (v === "ar" || v === "en") lang = v; }
+  catch (e) { /* storage blocked, English it is */ }
+
+  const t = (v) => (v && typeof v === "object" ? (v[lang] || v.en) : v);
+  const ui = (k) => t(UI[k]);
+
+  function applyLanguage() {
+    const root = document.documentElement;
+    root.lang = lang;
+    root.dir = lang === "ar" ? "rtl" : "ltr";
+    document.body.classList.toggle("is-ar", lang === "ar");
+
+    document.querySelectorAll("[data-t]").forEach((n) => {
+      const v = UI[n.dataset.t];
+      if (v) n.textContent = t(v);
+    });
+
+    const btn = $("#lang");
+    btn.textContent = ui("langBtn");
+    btn.lang = lang === "ar" ? "en" : "ar";
+    btn.setAttribute("aria-label", lang === "ar" ? "Switch to English" : "التبديل إلى العربية");
+
+    renderServices();
+    renderContact();
+    renderDevices();
+    reset();
+  }
+
+  function setLanguage(next) {
+    lang = next;
+    try { localStorage.setItem("help-lang", next); } catch (e) { /* blocked */ }
+    applyLanguage();
+  }
+
   /* ---------------- services ---------------- */
-  const svcs = $("#svcs");
-  SERVICES.forEach((s) => {
-    const li = el("li", "svc");
-    li.appendChild(el("h3", null, s.name));
-    li.appendChild(el("p", null, s.blurb));
-    svcs.appendChild(li);
-  });
+  function renderServices() {
+    const box = $("#svcs");
+    box.textContent = "";
+    SERVICES.forEach((s) => {
+      const li = el("li", "svc");
+      li.appendChild(el("h3", null, t(s.name)));
+      li.appendChild(el("p", null, t(s.blurb)));
+      box.appendChild(li);
+    });
+  }
 
   /* ---------------- contact ---------------- */
-  const list = $("#contact-list");
-  const shown = [];
-  if (CONTACT.email) {
-    const a = el("a", "contact-item");
-    a.href = "mailto:" + CONTACT.email;
-    a.appendChild(el("span", "contact-what", "Email"));
-    a.appendChild(el("b", null, CONTACT.email));
-    list.appendChild(a); shown.push("email");
+  function renderContact() {
+    const list = $("#contact-list");
+    list.textContent = "";
+    let shown = 0;
+
+    const add = (labelKey, value, href, external) => {
+      const a = el("a", "contact-item");
+      a.href = href;
+      if (external) { a.rel = "noopener"; a.target = "_blank"; }
+      a.appendChild(el("span", "contact-what", ui(labelKey)));
+      const b = el("b", null, value);
+      b.dir = "ltr";                  /* an address or number is never RTL */
+      a.appendChild(b);
+      list.appendChild(a);
+      shown++;
+    };
+
+    if (CONTACT.email) add("email", CONTACT.email, "mailto:" + CONTACT.email);
+    if (CONTACT.phone) add("phone", CONTACT.phone, "tel:" + CONTACT.phone.replace(/\s+/g, ""));
+    if (CONTACT.whatsapp) add("whatsapp", CONTACT.whatsapp,
+      "https://wa.me/" + CONTACT.whatsapp.replace(/\D/g, ""), true);
+
+    $("#contact-note").textContent = ui(shown > 1 ? "noteMany" : "noteOne");
   }
-  if (CONTACT.phone) {
-    const a = el("a", "contact-item");
-    a.href = "tel:" + CONTACT.phone.replace(/\s+/g, "");
-    a.appendChild(el("span", "contact-what", "Phone"));
-    a.appendChild(el("b", null, CONTACT.phone));
-    list.appendChild(a); shown.push("phone");
-  }
-  if (CONTACT.whatsapp) {
-    const a = el("a", "contact-item");
-    a.href = "https://wa.me/" + CONTACT.whatsapp.replace(/\D/g, "");
-    a.rel = "noopener"; a.target = "_blank";
-    a.appendChild(el("span", "contact-what", "WhatsApp"));
-    a.appendChild(el("b", null, CONTACT.whatsapp));
-    list.appendChild(a); shown.push("whatsapp");
-  }
-  $("#contact-note").textContent = shown.length > 1
-    ? "Whichever is easiest. Email gets you a written answer you can keep."
-    : "Email is the way to reach us at the moment. A phone number is on its way.";
 
   /* ---------------- triage ---------------- */
-  const q1 = $("#q1"), q2 = $("#q2"), out = $("#result");
+  const q1 = () => $("#q1"), q2 = () => $("#q2"), out = () => $("#result");
   let device = null;
 
   function optionButton(label, onPick) {
@@ -59,27 +94,36 @@
     return b;
   }
 
-  TRIAGE.devices.forEach((d) => {
-    $("#devices").appendChild(optionButton(d.label, () => pickDevice(d.key)));
-  });
+  function renderDevices() {
+    const box = $("#devices");
+    box.textContent = "";
+    TRIAGE.devices.forEach((d) => box.appendChild(optionButton(t(d.label), () => pickDevice(d.key))));
+  }
+
+  function reset() {
+    device = null;
+    q1().hidden = false;
+    q2().hidden = true;
+    out().hidden = true;
+  }
 
   function pickDevice(key) {
     device = key;
     const box = $("#symptoms");
     box.textContent = "";
-    TRIAGE.symptoms[key].forEach((s) => {
-      box.appendChild(optionButton(s.label, () => pickSymptom(s.key, s.label)));
-    });
-    q1.hidden = true; q2.hidden = false; out.hidden = true;
-    q2.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    TRIAGE.symptoms[key].forEach((s) =>
+      box.appendChild(optionButton(t(s.label), () => pickSymptom(s.key, t(s.label)))));
+    q1().hidden = true; q2().hidden = false; out().hidden = true;
+    q2().scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   function pickSymptom(key, label) {
     const a = TRIAGE.answers[device + ":" + key];
-    out.textContent = "";
+    const o = out();
+    o.textContent = "";
     if (!a) {
-      out.appendChild(el("p", "r-likely", "We do not have a shortcut for that one. Send us a message and describe it in your own words."));
-      out.hidden = false;
+      o.appendChild(el("p", "r-likely", ui("noShortcut")));
+      o.hidden = false;
       return;
     }
 
@@ -87,38 +131,35 @@
     head.appendChild(el("h3", null, label));
     if (a.urgency !== "low") {
       head.appendChild(el("span", "r-flag r-" + a.urgency,
-        a.urgency === "urgent" ? "Act now" : "Worth looking at"));
+        ui(a.urgency === "urgent" ? "actNow" : "worthLooking")));
     }
-    out.appendChild(head);
-
-    out.appendChild(el("p", "r-likely", a.likely));
+    o.appendChild(head);
+    o.appendChild(el("p", "r-likely", t(a.likely)));
 
     if (a.self && a.self.length) {
-      out.appendChild(el("p", "r-sub", "Try this first"));
+      o.appendChild(el("p", "r-sub", ui("tryFirst")));
       const ul = el("ul", "r-list");
-      a.self.forEach((s) => ul.appendChild(el("li", null, s)));
-      out.appendChild(ul);
+      a.self.forEach((s) => ul.appendChild(el("li", null, t(s))));
+      o.appendChild(ul);
     }
 
-    out.appendChild(el("p", "r-next", a.bring
-      ? "If that does not sort it, bring it in and we will look at it properly."
-      : "Send us the address and we will check it and tell you what we find."));
+    o.appendChild(el("p", "r-next", ui(a.bring ? "bringIn" : "sendAddress")));
 
     const cta = el("a", "btn");
     cta.href = "mailto:" + CONTACT.email + "?subject=" + encodeURIComponent("Help with: " + label);
-    cta.textContent = "Email us about this";
-    out.appendChild(cta);
+    cta.textContent = ui("emailAbout");
+    o.appendChild(cta);
+    o.appendChild(el("p", "r-fine", ui("notDiagnosis")));
 
-    out.appendChild(el("p", "r-fine",
-      "This is what the problem usually turns out to be, not a diagnosis. "
-      + "Two machines can show the same symptom for completely different reasons."));
-
-    out.hidden = false;
-    out.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    o.hidden = false;
+    o.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   $("#back").addEventListener("click", () => {
-    q2.hidden = true; out.hidden = true; q1.hidden = false;
-    q1.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    q2().hidden = true; out().hidden = true; q1().hidden = false;
+    q1().scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
+  $("#lang").addEventListener("click", () => setLanguage(lang === "ar" ? "en" : "ar"));
+
+  applyLanguage();
 })();

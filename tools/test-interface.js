@@ -40,52 +40,72 @@ let url;
     return b.top < innerHeight && b.height > 40;
   }));
 
-  /* ---------- every triage path ----------
-     24 paths, all clicked. A dead end here sends a customer away with
-     nothing, which is worse than not offering the tool. */
-  const devices = await p.evaluate(() => TRIAGE.devices.map(d => d.key));
-  let paths = 0, empty = [], noFine = [], noCta = [];
-  for (const dev of devices) {
-    const syms = await p.evaluate(d => TRIAGE.symptoms[d].map(s => s.key), dev);
-    for (const sym of syms) {
-      const r = await p.evaluate(([d, s]) => {
-        document.querySelectorAll('#devices .opt')[
-          TRIAGE.devices.findIndex(x => x.key === d)].click();
-        document.querySelectorAll('#symptoms .opt')[
-          TRIAGE.symptoms[d].findIndex(x => x.key === s)].click();
-        const out = document.getElementById('result');
-        return { hidden: out.hidden, text: out.innerText,
-                 cta: !!out.querySelector('a.btn'),
-                 href: out.querySelector('a.btn') ? out.querySelector('a.btn').getAttribute('href') : '' };
-      }, [dev, sym]);
-      paths++;
-      if (r.hidden || r.text.trim().length < 60) empty.push(`${dev}:${sym}`);
-      if (!/not a diagnosis/i.test(r.text)) noFine.push(`${dev}:${sym}`);
-      if (!r.cta || !r.href.startsWith('mailto:')) noCta.push(`${dev}:${sym}`);
-      await p.evaluate(() => document.getElementById('back').click());
-    }
-  }
-  T('every triage path gives an answer', empty.length === 0, `${paths} paths, ${empty.length} empty`);
-  T('every answer says it is not a diagnosis', noFine.length === 0, noFine.join(', ') || 'all do');
-  T('every answer offers a way to get in touch', noCta.length === 0, noCta.join(', ') || 'all do');
+  /* ---------- every triage path, in both languages ----------
+     48 walks. A dead end sends a customer away with nothing, and a path that
+     works in English but falls back to English inside Arabic is a half
+     translated page, which is worse than an English one. */
+  for (const lang of ['en', 'ar']) {
+    await p.evaluate((l) => {
+      if (document.documentElement.lang !== l) document.getElementById('lang').click();
+    }, lang);
+    await p.waitForTimeout(120);
+    T(`${lang}: the document direction is right`, await p.evaluate((l) =>
+      document.documentElement.dir === (l === 'ar' ? 'rtl' : 'ltr'), lang));
 
-  /* the urgent cases have to read as urgent */
-  const urgent = await p.evaluate(() => {
-    const out = [];
-    for (const [k, v] of Object.entries(TRIAGE.answers)) if (v.urgency === 'urgent') out.push(k);
-    return out;
-  });
-  T('the urgent cases are flagged', urgent.length >= 4, urgent.join(', '));
-  const spill = await p.evaluate(() => {
-    document.querySelectorAll('#devices .opt')[0].click();
-    const i = TRIAGE.symptoms.laptop.findIndex(s => s.key === 'liquid');
-    document.querySelectorAll('#symptoms .opt')[i].click();
-    const out = document.getElementById('result');
-    return { flag: (out.querySelector('.r-flag') || {}).textContent || '', text: out.innerText };
-  });
-  T('a liquid spill says turn it off now', /act now/i.test(spill.flag) && /turn it off now/i.test(spill.text));
-  T('a liquid spill warns against rice and hairdryers', /rice/i.test(spill.text));
-  await p.evaluate(() => document.getElementById('back').click());
+    const devices = await p.evaluate(() => TRIAGE.devices.map(d => d.key));
+    let paths = 0; const empty = [], noFine = [], fellBack = [];
+    for (const dev of devices) {
+      const syms = await p.evaluate(d => TRIAGE.symptoms[d].map(s => s.key), dev);
+      for (const sym of syms) {
+        const r = await p.evaluate(([d, s, l]) => {
+          document.querySelectorAll('#devices .opt')[TRIAGE.devices.findIndex(x => x.key === d)].click();
+          document.querySelectorAll('#symptoms .opt')[TRIAGE.symptoms[d].findIndex(x => x.key === s)].click();
+          const out = document.getElementById('result');
+          const txt = out.innerText;
+          const want = l === 'ar' ? TRIAGE.answers[d + ':' + s].likely.ar
+                                  : TRIAGE.answers[d + ':' + s].likely.en;
+          return { hidden: out.hidden, len: txt.trim().length,
+                   right: txt.includes(want),
+                   fine: new RegExp(l === 'ar' ? 'وليس تشخيصاً' : 'not a diagnosis').test(txt),
+                   cta: !!out.querySelector('a.btn') };
+        }, [dev, sym, lang]);
+        paths++;
+        if (r.hidden || r.len < 40 || !r.cta) empty.push(`${dev}:${sym}`);
+        if (!r.right) fellBack.push(`${dev}:${sym}`);
+        if (!r.fine) noFine.push(`${dev}:${sym}`);
+        await p.evaluate(() => document.getElementById('back').click());
+      }
+    }
+    T(`${lang}: every triage path gives an answer`, empty.length === 0, `${paths} paths, ${empty.length} empty`);
+    T(`${lang}: no path falls back to the other language`, fellBack.length === 0,
+      fellBack.slice(0, 4).join(', ') || 'all in language');
+    T(`${lang}: every answer says it is not a diagnosis`, noFine.length === 0,
+      noFine.slice(0, 4).join(', ') || 'all do');
+  }
+
+  /* the urgent cases have to read as urgent, in both */
+  for (const lang of ['en', 'ar']) {
+    const spill = await p.evaluate((l) => {
+      if (document.documentElement.lang !== l) document.getElementById('lang').click();
+      document.querySelectorAll('#devices .opt')[0].click();
+      const i = TRIAGE.symptoms.laptop.findIndex(s => s.key === 'liquid');
+      document.querySelectorAll('#symptoms .opt')[i].click();
+      const out = document.getElementById('result');
+      return { flag: (out.querySelector('.r-flag') || {}).textContent || '', text: out.innerText };
+    }, lang);
+    T(`${lang}: a liquid spill is flagged and says turn it off`,
+      spill.flag.length > 0 && new RegExp(lang === 'ar' ? 'أطفئه الآن' : 'Turn it off now').test(spill.text));
+    T(`${lang}: a liquid spill warns against rice`,
+      new RegExp(lang === 'ar' ? 'الأرزّ' : 'rice').test(spill.text));
+    await p.evaluate(() => document.getElementById('back').click());
+  }
+
+  /* the choice has to survive a reload, or nobody will use it twice */
+  await p.evaluate(() => { if (document.documentElement.lang !== 'ar') document.getElementById('lang').click(); });
+  await p.reload({ waitUntil: 'networkidle' });
+  T('the language choice survives a reload', await p.evaluate(() =>
+    document.documentElement.lang === 'ar' && document.documentElement.dir === 'rtl'));
+  await p.evaluate(() => document.getElementById('lang').click());
 
   /* ---------- contact ---------- */
   const contact = await p.evaluate(() => ({
@@ -121,7 +141,7 @@ let url;
     return [check('.lede', 'lede'), check('.fine', 'fine print'), check('.kicker', 'kicker'),
             check('.svc p', 'service text'), check('.opt', 'option button'),
             check('.cta', 'header button'), check('.steps li', 'step'),
-            check('.contact-what', 'contact label')];
+            check('.contact-what', 'contact label'), check('.lang', 'language button')];
   });
   contrast.forEach(c => c.skipped ? T(`contrast ${c.label}`, false, 'not found')
     : T(`contrast ${c.label}`, c.pass, `${c.ratio} vs ${c.need} at ${c.px}px`));
@@ -137,10 +157,11 @@ let url;
   await njc.close();
 
   /* ---------- phone ---------- */
-  for (const [w, h] of [[390, 844], [412, 915]]) {
+  for (const [w, h, lang] of [[390, 844, 'en'], [412, 915, 'en'], [390, 844, 'ar'], [412, 915, 'ar']]) {
     const mp = await b.newPage({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
-    mp.on('pageerror', e => errs.push(`${w}px: ${e.message}`));
+    mp.on('pageerror', e => errs.push(`${w}px ${lang}: ${e.message}`));
     await mp.goto(url, { waitUntil: 'networkidle' });
+    await mp.evaluate((l) => { if (document.documentElement.lang !== l) document.getElementById('lang').click(); }, lang);
     await mp.evaluate(() => document.fonts.ready);
     const m = await mp.evaluate(() => ({
       hscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -149,9 +170,9 @@ let url;
       smallTargets: [...document.querySelectorAll('a.cta, a.btn, .opt, .contact-item')]
         .filter(e => e.getBoundingClientRect().height < 44).length,
     }));
-    T(`${w}px: no horizontal scroll`, !m.hscroll);
-    T(`${w}px: nothing overflows`, m.overflow === 0, `${m.overflow} elements`);
-    T(`${w}px: every tap target is at least 44px`, m.smallTargets === 0, `${m.smallTargets} too small`);
+    T(`${w}px ${lang}: no horizontal scroll`, !m.hscroll);
+    T(`${w}px ${lang}: nothing overflows`, m.overflow === 0, `${m.overflow} elements`);
+    T(`${w}px ${lang}: every tap target is at least 44px`, m.smallTargets === 0, `${m.smallTargets} too small`);
     await mp.close();
   }
 

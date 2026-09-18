@@ -117,18 +117,18 @@ def gate_promises_are_kept():
 def gate_triage_is_complete():
     """Every path a visitor can click has to land on an answer."""
     src = data()
-    devices = re.findall(r'\{ key: "(\w+)",\s+label:', src.split("symptoms:")[0])
     ok = True
-    sym_block = src.split("symptoms: {")[1].split("answers:")[0]
-    ans = set(re.findall(r'"(\w+:\w+)":', src.split("answers:")[1]))
+    sym_block = src.split('"symptoms":')[1].split('"answers":')[0]
+    devices = re.findall(r'"(\w+)":\s*\[', sym_block)
+    ans = set(re.findall(r'"(\w+:\w+)":\s*\{', src.split('"answers":')[1]))
     paths = 0
     for dev in devices:
-        chunk = re.search(rf"{dev}:\s*\[(.*?)\]", sym_block, re.S)
+        chunk = re.search(rf'"{dev}":\s*\[(.*?)\n    \]', sym_block, re.S)
         if not chunk:
             failures.append(f"device '{dev}' has no symptom list")
             ok = False
             continue
-        for sym in re.findall(r'\{ key: "(\w+)"', chunk.group(1)):
+        for sym in re.findall(r'"key":\s*"(\w+)"', chunk.group(1)):
             paths += 1
             if f"{dev}:{sym}" not in ans:
                 failures.append(f"triage path with no answer: {dev}:{sym}")
@@ -157,6 +157,66 @@ def gate_triage_does_not_diagnose():
     return ok
 
 
+def gate_bilingual_coverage():
+    """
+    Every visible string has to exist in both languages. A half translated
+    page is worse than an English one, because the visitor cannot tell which
+    parts they are missing.
+    """
+    import json as _json
+    src = data()
+    ok = True
+    # every en needs an ar beside it
+    pairs = len(re.findall(r'"en":\s*"', src))
+    ars = len(re.findall(r'"ar":\s*"', src))
+    if pairs != ars:
+        failures.append(f"bilingual mismatch: {pairs} english strings, {ars} arabic")
+        ok = False
+    empty = re.findall(r'"ar":\s*""', src)
+    if empty:
+        failures.append(f"{len(empty)} arabic strings are empty")
+        ok = False
+    # and every data-t key in the markup has to exist in UI
+    keys = set(re.findall(r'data-t="(\w+)"', html()))
+    have = set(re.findall(r'"(\w+)":\s*\{\s*"en"', src))
+    missing = sorted(keys - have)
+    if missing:
+        failures.append("markup asks for strings that do not exist: " + ", ".join(missing))
+        ok = False
+    print(f"    bilingual: {pairs} string pairs, {len(keys)} markup keys")
+    return ok
+
+
+def gate_western_digits():
+    """
+    Arabic copy here uses Western digits, which is what Kuwait uses in
+    practice. A mix of both on one page looks like a mistake.
+    """
+    bad = re.findall(r"[\u0660-\u0669\u06F0-\u06F9]", data() + html())
+    if bad:
+        failures.append(f"{len(bad)} Arabic-Indic digits found; this site uses Western digits")
+        return False
+    return True
+
+
+def gate_rtl_is_real():
+    """
+    Setting dir without logical properties gives a page that is mirrored in
+    direction but still padded on the wrong side.
+    """
+    css = (ROOT / "assets" / "styles.css").read_text(encoding="utf-8")
+    js = (ROOT / "assets" / "app.js").read_text(encoding="utf-8")
+    ok = True
+    if 'root.dir = lang === "ar" ? "rtl" : "ltr"' not in js:
+        failures.append("the document direction is never switched for Arabic")
+        ok = False
+    physical = re.findall(r"\n\s*(padding-left|padding-right|margin-left|margin-right|left|right):", css)
+    if len(physical) > 2:
+        failures.append(f"{len(physical)} physical side properties in the stylesheet; RTL will not follow")
+        ok = False
+    return ok
+
+
 GATES = [
     ("unicode dashes", gate_unicode_dashes),
     ("attribution", gate_attribution),
@@ -164,6 +224,9 @@ GATES = [
     (".nojekyll", gate_nojekyll),
     ("no invented details", gate_no_invented_details),
     ("promises are kept", gate_promises_are_kept),
+    ("bilingual coverage", gate_bilingual_coverage),
+    ("western digits", gate_western_digits),
+    ("rtl is real", gate_rtl_is_real),
     ("triage is complete", gate_triage_is_complete),
     ("triage does not diagnose", gate_triage_does_not_diagnose),
 ]
