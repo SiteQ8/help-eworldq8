@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="eWorld Help">
+  <rect width="32" height="32" rx="7" fill="#0f4c81"/>
+  <path d="M10 20.5V11h7.5" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="square"/>
+  <path d="M10 15.8h6" stroke="#ffb547" stroke-width="3" fill="none" stroke-linecap="square"/>
+  <rect x="19.5" y="18" width="3" height="3" fill="#ffb547"/>
+</svg>

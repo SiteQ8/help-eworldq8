@@ -1,0 +1,55 @@
+name: Publish to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run preflight gates
+        run: python3 tools/preflight.py
+
+  deploy:
+    needs: preflight
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # GitHub Pages serves everything with cache-control: max-age=600, and the
+      # HTML and the stylesheet expire independently. That lets a browser pair
+      # new HTML with a ten minute old stylesheet, which is exactly how a
+      # deployed layout change appears not to have happened. Stamping the
+      # stylesheet's own content hash into the href ties them together: when
+      # the markup updates, the CSS URL it asks for has already changed.
+      - name: Stamp the stylesheet hash into the href
+        run: |
+          HASH=$(sha256sum assets/styles.css | cut -c1-10)
+          sed -i "s|href=\"assets/styles.css[^\"]*\"|href=\"assets/styles.css?v=$HASH\"|" index.html
+          echo "stylesheet pinned to $HASH"
+          grep -o 'assets/styles.css?v=[a-f0-9]*' index.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
