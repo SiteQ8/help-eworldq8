@@ -177,6 +177,78 @@ const UI = {
   "of": {
     "en": "of",
     "ar": "من"
+  },
+  "navGuides": {
+    "en": "Guides",
+    "ar": "الأدلّة"
+  },
+  "searchLabel": {
+    "en": "What is the problem?",
+    "ar": "ما المشكلة؟"
+  },
+  "searchPh": {
+    "en": "Try \"laptop will not turn on\" or \"deleted files\"",
+    "ar": "جرّب \"لابتوب لا يعمل\" أو \"ملفات محذوفة\""
+  },
+  "searchNone": {
+    "en": "Nothing matched that. Try fewer words, or use the two questions below.",
+    "ar": "لا شيء يطابق ذلك، فجرّب كلمات أقلّ أو استعمل السؤالين أدناه."
+  },
+  "browseKicker": {
+    "en": "Browse by topic",
+    "ar": "تصفّح حسب الموضوع"
+  },
+  "browseH": {
+    "en": "Guides you can follow yourself.",
+    "ar": "أدلّة يمكنك اتّباعها بنفسك."
+  },
+  "allGuides": {
+    "en": "See all guides",
+    "ar": "كلّ الأدلّة"
+  },
+  "guideCount": {
+    "en": "guides",
+    "ar": "أدلّة"
+  },
+  "askFormKicker": {
+    "en": "Ask us",
+    "ar": "اسألنا"
+  },
+  "askFormH": {
+    "en": "Still stuck? Tell us in your own words.",
+    "ar": "ما زلت عالقاً؟ أخبرنا بكلماتك أنت."
+  },
+  "askFormP": {
+    "en": "This opens an email to us with what you write below already filled in. Nothing is sent until you press send in your mail app.",
+    "ar": "يفتح هذا رسالة بريد إلينا وقد مُلئت بما تكتبه أدناه، ولا يُرسل شيء حتى تضغط إرسال في تطبيق بريدك."
+  },
+  "fName": {
+    "en": "Your name",
+    "ar": "اسمك"
+  },
+  "fDevice": {
+    "en": "What is it about?",
+    "ar": "ما موضوع الطلب؟"
+  },
+  "fDeviceOpt": {
+    "en": "Laptop|Desktop|Phone or tablet|A website|Something else",
+    "ar": "حاسوب محمول|حاسوب مكتبي|هاتف أو جهاز لوحي|موقع إلكتروني|شيء آخر"
+  },
+  "fWhat": {
+    "en": "What is happening?",
+    "ar": "ما الذي يحدث؟"
+  },
+  "fWhatPh": {
+    "en": "When it started, what you see on the screen, anything you already tried.",
+    "ar": "متى بدأ، وما تراه على الشاشة، وأيّ شيء جرّبته بالفعل."
+  },
+  "fSend": {
+    "en": "Open the email",
+    "ar": "افتح الرسالة"
+  },
+  "fNeed": {
+    "en": "Say what is happening first, even one line.",
+    "ar": "اكتب ما يحدث أولاً ولو سطراً واحداً."
   }
 };
 

@@ -205,7 +205,7 @@ def gate_rtl_is_real():
     direction but still padded on the wrong side.
     """
     css = (ROOT / "assets" / "styles.css").read_text(encoding="utf-8")
-    js = (ROOT / "assets" / "app.js").read_text(encoding="utf-8")
+    js = (ROOT / "assets" / "site.js").read_text(encoding="utf-8")
     ok = True
     if 'root.dir = lang === "ar" ? "rtl" : "ltr"' not in js:
         failures.append("the document direction is never switched for Arabic")
@@ -214,6 +214,87 @@ def gate_rtl_is_real():
     if len(physical) > 2:
         failures.append(f"{len(physical)} physical side properties in the stylesheet; RTL will not follow")
         ok = False
+    return ok
+
+
+def gate_guides_are_substantial():
+    """
+    The guides are the point of a help site. Each has to be followable on
+    its own: a real title, a summary, at least four steps in both languages,
+    and a stop line saying when to ask, because the wrong step at the wrong
+    moment does more harm than the original problem.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "content"))
+    import importlib, guides as G
+    importlib.reload(G)
+    ok = True
+    slugs = set()
+    for g in G.GUIDES:
+        for field in ("title", "summary", "stop", "keywords"):
+            v = g.get(field, {})
+            if not (v.get("en") and v.get("ar")):
+                failures.append(f"guide {g.get('slug')}: {field} is missing a language")
+                ok = False
+        if len(g.get("steps", [])) < 4:
+            failures.append(f"guide {g['slug']}: fewer than four steps")
+            ok = False
+        for i, st in enumerate(g.get("steps", [])):
+            if not (st.get("en") and st.get("ar")):
+                failures.append(f"guide {g['slug']}: step {i+1} is missing a language")
+                ok = False
+        if g["slug"] in slugs:
+            failures.append(f"duplicate slug {g['slug']}")
+            ok = False
+        slugs.add(g["slug"])
+        if g["category"] not in {c["key"] for c in G.CATEGORIES}:
+            failures.append(f"guide {g['slug']}: unknown category {g['category']}")
+            ok = False
+    print(f"    guides: {len(G.GUIDES)} in {len(G.CATEGORIES)} categories")
+    return ok
+
+
+def gate_generated_pages_are_current():
+    """
+    The guide pages are committed output. If content changes and the build
+    was not rerun, the site serves the old guide. Regenerate to a scratch
+    copy and compare.
+    """
+    import subprocess, tempfile, shutil, filecmp
+    ok = True
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch = pathlib.Path(tmp) / "site"
+        shutil.copytree(ROOT, scratch, ignore=shutil.ignore_patterns(".git", "node_modules"))
+        subprocess.run([sys.executable, str(scratch / "tools" / "build.py")],
+                       capture_output=True, text=True, check=True)
+        for rel in ["guides/index.html", "search.json"] + \
+                   [f"guides/{d.name}/index.html" for d in (scratch / "guides").iterdir() if d.is_dir()]:
+            a, b = ROOT / rel, scratch / rel
+            if not a.exists():
+                failures.append(f"generated page missing: {rel}, run tools/build.py")
+                ok = False
+            elif not filecmp.cmp(a, b, shallow=False):
+                failures.append(f"generated page is stale: {rel}, run tools/build.py")
+                ok = False
+    return ok
+
+
+def gate_internal_links_resolve():
+    """A help site with a dead link inside it has failed at the one job."""
+    ok = True
+    pages = [ROOT / "index.html", ROOT / "guides" / "index.html"] + \
+            [p for p in (ROOT / "guides").glob("*/index.html")]
+    for page in pages:
+        base = page.parent
+        for href in re.findall(r'href="([^"#?]+)', page.read_text(encoding="utf-8")):
+            if href.startswith(("http", "mailto:", "tel:")):
+                continue
+            target = (base / href).resolve()
+            if target.is_dir():
+                target = target / "index.html"
+            if not target.exists():
+                failures.append(f"{page.relative_to(ROOT)} links to {href}, which does not exist")
+                ok = False
     return ok
 
 
@@ -229,6 +310,9 @@ GATES = [
     ("rtl is real", gate_rtl_is_real),
     ("triage is complete", gate_triage_is_complete),
     ("triage does not diagnose", gate_triage_does_not_diagnose),
+    ("guides are substantial", gate_guides_are_substantial),
+    ("generated pages are current", gate_generated_pages_are_current),
+    ("internal links resolve", gate_internal_links_resolve),
 ]
 
 

@@ -6,11 +6,14 @@ const http = require('http');
 const fs = require('fs');
 
 const ROOT = path.resolve(__dirname, '..');
-const TYPES = { '.html':'text/html', '.css':'text/css', '.js':'text/javascript', '.svg':'image/svg+xml' };
+const TYPES = { '.html':'text/html', '.css':'text/css', '.js':'text/javascript', '.svg':'image/svg+xml', '.json':'application/json', '.png':'image/png' };
 const server = http.createServer((req, res) => {
   const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
-  const file = path.join(ROOT, rel);
-  if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+  let file = path.join(ROOT, rel);
+  /* a folder serves its index.html, as GitHub Pages does; without this every
+     guide URL was a 404 in the harness and a pass in production */
+  if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
+  if (!file.startsWith(ROOT) || !fs.existsSync(file)) {
     res.writeHead(404); res.end('not found'); return;
   }
   res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
@@ -37,9 +40,13 @@ let url;
   T('no undefined anywhere', await p.evaluate(() => !document.body.innerText.includes('undefined')));
   /* the triage sits inside the hero now, so the first thing to tap is the
      first device option, and it has to be on screen without scrolling */
-  T('the first action is above the fold', await p.evaluate(() => {
-    const b = document.querySelector('#devices .opt').getBoundingClientRect();
+  T('the search box is above the fold', await p.evaluate(() => {
+    const b = document.getElementById('q').getBoundingClientRect();
     return b.top < innerHeight && b.height > 40;
+  }));
+  T('the real logo is in the header', await p.evaluate(() => {
+    const i = document.querySelector('.brand img');
+    return !!i && i.naturalWidth > 0 && /logo/.test(i.getAttribute('src'));
   }));
   T('the step counter reads step 1 of 2', await p.evaluate(() =>
     /1 .* 2/.test(document.getElementById('ask-step').textContent)));
@@ -115,6 +122,54 @@ let url;
     document.documentElement.lang === 'ar' && document.documentElement.dir === 'rtl'));
   await p.evaluate(() => document.getElementById('lang').click());
 
+  /* ---------- search, in both languages ----------
+     Typing the problem is how most people arrive at a help site. Both
+     languages have to reach the same guide, and nonsense has to say so
+     rather than show nothing. */
+  await p.waitForFunction(() => document.querySelectorAll('#cats .cat').length === 6, { timeout: 5000 });
+  const searches = [
+    ['en', 'laptop will not turn on', 'laptop-will-not-turn-on'],
+    ['en', 'deleted files', 'recover-deleted-files'],
+    ['en', 'wifi dropping', 'wifi-keeps-dropping'],
+    ['ar', 'لابتوب لا يعمل', 'laptop-will-not-turn-on'],
+    ['ar', 'ملفات محذوفة', 'recover-deleted-files'],
+    ['ar', 'احتيال', 'spotting-a-scam-message'],
+  ];
+  for (const [lang, q, slug] of searches) {
+    await p.evaluate((l) => { if (document.documentElement.lang !== l) document.getElementById('lang').click(); }, lang);
+    await p.fill('#q', q);
+    await p.waitForTimeout(150);
+    const top = await p.evaluate(() => {
+      const a = document.querySelector('#hits .hit a');
+      return a ? a.getAttribute('href') : null;
+    });
+    T(`${lang}: "${q}" finds the right guide first`, top === `guides/${slug}/`, top || 'no hits');
+  }
+  await p.fill('#q', 'xqzvv plorb');
+  await p.waitForTimeout(150);
+  T('nonsense says nothing matched rather than showing nothing', await p.evaluate(() =>
+    !!document.querySelector('#hits .hit-none') && !document.getElementById('hits').hidden));
+  await p.fill('#q', '');
+  await p.evaluate(() => { if (document.documentElement.lang !== 'en') document.getElementById('lang').click(); });
+
+  T('every category tile links to a section that exists', await p.evaluate(async () => {
+    const hrefs = [...document.querySelectorAll('#cats a')].map(a => a.getAttribute('href'));
+    const html = await (await fetch('guides/')).text();
+    return hrefs.length === 6 && hrefs.every(h => html.includes('id="' + h.split('#')[1] + '"'));
+  }));
+
+  /* ---------- the ask form composes an email, nothing more ---------- */
+  const formGo = await p.evaluate(() => {
+    const f = document.getElementById('askform');
+    f.name.value = 'Test'; f.what.value = 'The screen stays black when I press power.';
+    return window.__composeAsk(f);
+  });
+  T('the form refuses an empty description', await p.evaluate(() => {
+    const f = document.getElementById('askform'); f.what.value = '';
+    f.dispatchEvent(new Event('submit', { cancelable: true }));
+    return !document.getElementById('form-err').hidden;
+  }));
+
   /* ---------- contact ---------- */
   const contact = await p.evaluate(() => ({
     items: [...document.querySelectorAll('.contact-item')].map(a => a.getAttribute('href')),
@@ -147,7 +202,7 @@ let url;
       return { label, ratio: +r.toFixed(2), need, pass: r >= need, px: +size.toFixed(1) };
     };
     return [check('.lede', 'lede'), check('.fine', 'fine print'), check('.kicker', 'kicker'),
-            check('.svc:not(.is-wide) p', 'service text'), check('.svc.is-wide p', 'wide card text'), check('.opt', 'option button'), check('.svc-tag.is-remote', 'remote tag'),
+            check('.svc:not(.is-wide) p', 'service text'), check('.svc.is-wide p', 'wide card text'), check('.opt', 'option button'), check('.svc-tag.is-remote', 'remote tag'), check('.cat-n', 'category count'), check('.foot p', 'footer'),
             check('.cta', 'header button'), check('.steps li', 'step'),
             check('.contact-what', 'contact label'), check('.lang', 'language button')];
   });
@@ -163,6 +218,74 @@ let url;
   T('the way to get in touch survives without scripting',
     (await nj.locator('a[href^="mailto:"], a[href^="#ask"]').count()) > 0);
   await njc.close();
+
+  /* ---------- every guide page, both languages ---------- */
+  const slugs = JSON.parse(fs.readFileSync(path.join(ROOT, 'search.json'), 'utf8')).map(e => e.slug);
+  let bad = [];
+  for (const slug of slugs) {
+    const gp = await b.newPage({ viewport: { width: 1180, height: 900 } });
+    gp.on('pageerror', e => errs.push(`${slug}: ${e.message}`));
+    gp.on('response', r => { if (r.status() >= 400) errs.push(`HTTP ${r.status()} ${r.url()}`); });
+    await gp.goto(url + 'guides/' + slug + '/', { waitUntil: 'networkidle' });
+    /* visibility is measured by box, not by the hidden attribute: the
+       attribute was set and the elements were still on screen */
+    const en = await gp.evaluate(() => {
+      const vis = s => [...document.querySelectorAll(s)].filter(e => e.getBoundingClientRect().height > 0).length;
+      return {
+        title: document.querySelector('h1[data-lang="en"]')?.textContent.trim().length || 0,
+        steps: document.querySelectorAll('.guide-steps[data-lang="en"] li').length,
+        arVisible: vis('[data-lang="ar"]'), ctasVisible: vis('.guide-stop a.btn'),
+        cta: document.querySelector('.guide-stop a.btn[data-lang="en"]')?.getAttribute('href') || '',
+        logo: !!document.querySelector('.brand img'),
+        foot: document.querySelector('.foot p[data-t]')?.textContent,
+      };
+    });
+    await gp.evaluate(() => document.getElementById('lang').click());
+    const ar = await gp.evaluate(() => {
+      const vis = s => [...document.querySelectorAll(s)].filter(e => e.getBoundingClientRect().height > 0).length;
+      return {
+        dir: document.documentElement.dir,
+        title: document.querySelector('h1[data-lang="ar"]')?.textContent.trim().length || 0,
+        enVisible: vis('[data-lang="en"]'), ctasVisible: vis('.guide-stop a.btn'),
+        stepsVisible: vis('.guide-steps li'),
+        steps: document.querySelectorAll('.guide-steps[data-lang="ar"] li').length,
+        overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        foot: document.querySelector('.foot p[data-t]')?.textContent,
+      };
+    });
+    if (!(en.title > 5 && en.steps >= 4 && en.arVisible === 0 && en.ctasVisible === 1
+          && en.cta.startsWith('mailto:') && en.logo)) bad.push(slug + ' (en)');
+    if (!(ar.enVisible === 0 && ar.ctasVisible === 1 && ar.stepsVisible === ar.steps)) bad.push(slug + ' (ar: both languages showing)');
+    if (en.foot === ar.foot) bad.push(slug + ' (ar: strings did not swap)');
+    if (slug === slugs[0]) {
+      /* contrast on the guide page itself, measured once */
+      const gc = await gp.evaluate(() => {
+        const srgb = v => { v /= 255; return v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+        const lum = c => { const m = c.match(/[\d.]+/g).map(Number); return 0.2126*srgb(m[0])+0.7152*srgb(m[1])+0.0722*srgb(m[2]); };
+        const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return +((x+0.05)/(y+0.05)).toFixed(2); };
+        const bg = 'rgb(246,248,251)';
+        const r = s => ratio(getComputedStyle(document.querySelector(s)).color, bg);
+        return { step: r('.guide-steps[data-lang="en"] li'), lede: r('.guide-lede[data-lang="en"]'),
+                 crumb: r('.crumbs a[data-lang="en"]'), fine: r('.guide-fine[data-lang="en"]') };
+      });
+      T('contrast on a guide page', Object.values(gc).every(v => v >= 4.5),
+        Object.entries(gc).map(([k, v]) => `${k} ${v}`).join(', '));
+    }
+    if (!(ar.dir === 'rtl' && ar.title > 5 && ar.steps === en.steps && !ar.overflow)) bad.push(slug + ' (ar)');
+    await gp.close();
+  }
+  T(`every guide page renders in both languages`, bad.length === 0, bad.join(', ') || `${slugs.length} guides, both languages`);
+  // a fresh page has to come up in the remembered language
+  {
+    const gp = await b.newPage({ viewport: { width: 1180, height: 900 } });
+    await gp.goto(url + 'guides/', { waitUntil: 'networkidle' });
+    await gp.evaluate(() => { if (document.documentElement.lang !== 'ar') document.getElementById('lang').click(); });
+    await gp.goto(url + 'guides/' + slugs[0] + '/', { waitUntil: 'networkidle' });
+    T('the language choice carries between pages', await gp.evaluate(() =>
+      document.documentElement.lang === 'ar' && document.documentElement.dir === 'rtl'));
+    await gp.evaluate(() => document.getElementById('lang').click());
+    await gp.close();
+  }
 
   /* ---------- phone ---------- */
   for (const [w, h, lang] of [[390, 844, 'en'], [412, 915, 'en'], [390, 844, 'ar'], [412, 915, 'ar']]) {
