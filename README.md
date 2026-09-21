@@ -1,23 +1,46 @@
 # help.eworldq8.com
 
-Everyday computing help. Websites built and checked, laptops and desktops
-fixed, files recovered, things set up.
+Everyday computing help, wherever you are. Websites built and checked,
+laptops and desktops fixed, files recovered, things set up. Remote first;
+hardware that needs hands on it is arranged in person or by courier.
+
+Nothing on the page assumes a country or a shop down the road, and a test
+fails if "Kuwait" or "bring it in" reappears.
 
 Served at **https://siteq8.github.io/help-eworldq8/** until DNS is in place.
 
 ## Before it can use its own address
 
-`help.eworldq8.com` has no DNS record yet. Add this at whoever runs DNS for
-`eworldq8.com`:
+The DNS record exists but points at `ssiteq8.github.io.` with a double s.
+It has to be:
 
 ```
 CNAME   help   siteq8.github.io.
 ```
 
-Then tell me and I will add the `CNAME` file and bind it. Not before: binding
+Every `*.github.io` resolves to the same Pages IPs, so the typo still
+resolves, but GitHub cannot tell whose site to serve and answers 404 over
+http and 503 over https. Fix the one character and the `CNAME` file gets
+added and bound. Not before: binding
 a custom domain that does not resolve makes GitHub redirect the working
 github.io address to a dead one, and a gate fails the build if a `CNAME`
 appears while the record is missing.
+
+## The design
+
+Warm paper, one electric blue, one signal lime. Sora for anything read from
+across the room, Inter up close, IBM Plex Sans Arabic for Arabic.
+
+The triage lives inside the hero. It is the most useful thing on the page,
+and someone with a broken machine should not have to scroll to find it. The
+services are a bento grid: two dark cards anchor it and four light ones fill
+around them, each tagged remote or hands on so a visitor can see at a glance
+what needs a courier and what does not.
+
+Every `data-t` element carries its English text in the markup. The script
+only ever swaps language, so the page reads without scripting. An earlier
+build left those elements empty for the script to fill, and the no-script
+check caught the headline rendering blank.
 
 ## Arabic
 
@@ -74,7 +97,7 @@ python3 tools/preflight.py
 node tools/test-interface.js
 ```
 
-Eleven gates, forty two checks. The tests walk all twenty four triage paths
+Eleven gates, forty seven checks. The tests walk all twenty four triage paths
 in **both** languages, forty eight walks, and assert each produces an answer,
 carries the not-a-diagnosis line, offers a way to get in touch, and does not
 fall back to the other language. Nine contrast measurements, a no-script

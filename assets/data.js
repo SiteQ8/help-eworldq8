@@ -2,7 +2,8 @@
    Every string carries both languages. Plain words on purpose: somebody
    whose laptop died this morning is not in the mood for jargon, and the
    Arabic is written as Arabic rather than translated word for word, with
-   clauses joined by connectors instead of chopped into short sentences. */
+   clauses joined by connectors instead of chopped into short sentences.
+   Nothing here assumes a country or a shop down the road. */
 
 const UI = {
   "brandHelp": {
@@ -14,12 +15,12 @@ const UI = {
     "ar": "اطلب المساعدة"
   },
   "heroH": {
-    "en": "Something broken? Start here.",
-    "ar": "في جهازك خلل؟ ابدأ من هنا."
+    "en": "Something broken? Tell us.",
+    "ar": "في جهازك خلل؟ أخبرنا."
   },
   "heroP": {
-    "en": "Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs to come in.",
-    "ar": "حواسيب محمولة ومكتبية وهواتف ومواقع إلكترونية، أخبرنا بما يحدث بكلماتك أنت فنخبرك بما يكون عليه الأمر عادةً وبما يمكنك تجربته بنفسك ومتى يحتاج الجهاز إلى الفحص لدينا."
+    "en": "Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs a proper look.",
+    "ar": "حواسيب محمولة ومكتبية وهواتف ومواقع إلكترونية، أخبرنا بما يحدث بكلماتك أنت فنخبرك بما يكون عليه الأمر عادةً وبما يمكنك تجربته بنفسك ومتى يحتاج إلى فحص كما ينبغي."
   },
   "heroBtn": {
     "en": "Tell us what is wrong",
@@ -30,8 +31,8 @@ const UI = {
     "ar": "السؤال مجاني، ولا رسوم حتى توافق على العمل."
   },
   "askKicker": {
-    "en": "Not sure what is wrong?",
-    "ar": "لست متأكداً ما الخلل؟"
+    "en": "Start here",
+    "ar": "ابدأ من هنا"
   },
   "askH": {
     "en": "Two questions.",
@@ -118,8 +119,8 @@ const UI = {
     "ar": "يستحقّ الفحص"
   },
   "bringIn": {
-    "en": "If that does not sort it, bring it in and we will look at it properly.",
-    "ar": "فإن لم يحلّ ذلك المشكلة فأحضره إلينا لنفحصه كما ينبغي."
+    "en": "If that does not sort it, get in touch and we will arrange to look at it properly.",
+    "ar": "فإن لم يحلّ ذلك المشكلة فتواصل معنا لنرتّب فحصه كما ينبغي."
   },
   "sendAddress": {
     "en": "Send us the address and we will check it and tell you what we find.",
@@ -138,12 +139,44 @@ const UI = {
     "ar": "ليس لدينا اختصار لهذه الحالة، فراسلنا وصفها بكلماتك أنت."
   },
   "footPlace": {
-    "en": "Kuwait",
-    "ar": "الكويت"
+    "en": "Online anywhere. In person by arrangement.",
+    "ar": "عبر الإنترنت في أيّ مكان، وحضورياً بالترتيب."
   },
   "langBtn": {
     "en": "العربية",
     "ar": "English"
+  },
+  "heroEyebrow": {
+    "en": "Everyday computing help",
+    "ar": "مساعدة تقنية لكلّ يوم"
+  },
+  "reachH": {
+    "en": "Wherever you are.",
+    "ar": "أينما كنت."
+  },
+  "reachRemote": {
+    "en": "Websites, setup, slow machines and most problems can be sorted remotely, so it does not matter where you are.",
+    "ar": "المواقع والإعداد والأجهزة البطيئة وأغلب المشاكل تُحلّ عن بُعد، فلا يهمّ أين تكون."
+  },
+  "reachLocal": {
+    "en": "Hardware that needs hands on it, a dead board or a cracked screen, we arrange in person or through a courier.",
+    "ar": "أمّا العتاد الذي يحتاج إلى يد تلمسه، كلوحة معطّلة أو شاشة مكسورة، فنرتّبه حضورياً أو عبر شركة توصيل."
+  },
+  "stepOf": {
+    "en": "Step",
+    "ar": "الخطوة"
+  },
+  "remoteTag": {
+    "en": "Remote",
+    "ar": "عن بُعد"
+  },
+  "handsTag": {
+    "en": "Hands on",
+    "ar": "حضوري"
+  },
+  "of": {
+    "en": "of",
+    "ar": "من"
   }
 };
 
@@ -157,7 +190,8 @@ const SERVICES = [
     "blurb": {
       "en": "A site for your business, your shop or yourself. Written to load fast on a phone, because that is where most people will see it.",
       "ar": "موقع لعملك أو لمتجرك أو لك أنت، مكتوب ليفتح بسرعة على الهاتف لأنّ أغلب الناس سيرونه من هناك."
-    }
+    },
+    "remote": true
   },
   {
     "key": "website-check",
@@ -168,7 +202,8 @@ const SERVICES = [
     "blurb": {
       "en": "Is it slow, is it secure, does it work properly on a phone, does Google know it exists. You get a plain list of what is wrong and what it takes to fix.",
       "ar": "هل هو بطيء وهل هو آمن وهل يعمل كما ينبغي على الهاتف وهل تعرفه محركات البحث، فتحصل على قائمة واضحة بما فيه من خلل وبما يلزم لإصلاحه."
-    }
+    },
+    "remote": true
   },
   {
     "key": "laptop",
@@ -179,7 +214,8 @@ const SERVICES = [
     "blurb": {
       "en": "Will not start, running hot, screen gone, keyboard failing, slowed to a crawl, or liquid went where it should not.",
       "ar": "لا يعمل أو يسخن أو انطفأت شاشته أو تعطّلت لوحة مفاتيحه أو صار بطيئاً جداً أو انسكب عليه سائل."
-    }
+    },
+    "remote": false
   },
   {
     "key": "desktop",
@@ -190,7 +226,8 @@ const SERVICES = [
     "blurb": {
       "en": "Power problems, no display, crashes and blue screens, noisy fans, or a machine that has simply become too slow to use.",
       "ar": "مشاكل في الطاقة أو لا صورة على الشاشة أو توقّف وشاشات زرقاء أو مراوح عالية الصوت أو جهاز صار أبطأ من أن يُستعمل."
-    }
+    },
+    "remote": false
   },
   {
     "key": "data",
@@ -199,9 +236,10 @@ const SERVICES = [
       "ar": "استرجاع الملفات"
     },
     "blurb": {
-      "en": "A drive that stopped being recognised, files deleted by accident, or a phone that will not turn on. Stop using the device and bring it in.",
-      "ar": "قرص لم يعد الجهاز يتعرّف عليه أو ملفات حُذفت بالخطأ أو هاتف لا يشتغل، فأوقف استعمال الجهاز وأحضره إلينا."
-    }
+      "en": "A drive that stopped being recognised, files deleted by accident, or a phone that will not turn on. Stop using the device and get in touch.",
+      "ar": "قرص لم يعد الجهاز يتعرّف عليه أو ملفات حُذفت بالخطأ أو هاتف لا يشتغل، فأوقف استعمال الجهاز وتواصل معنا."
+    },
+    "remote": false
   },
   {
     "key": "setup",
@@ -212,7 +250,8 @@ const SERVICES = [
     "blurb": {
       "en": "New machine, home or office network, printers, backups that actually run, and getting your accounts off one device and onto another.",
       "ar": "جهاز جديد أو شبكة للمنزل أو المكتب أو طابعات أو نسخ احتياطي يعمل فعلاً أو نقل حساباتك من جهاز إلى آخر."
-    }
+    },
+    "remote": true
   }
 ];
 
@@ -484,8 +523,8 @@ const TRIAGE = {
       "urgency": "normal",
       "bring": true,
       "likely": {
-        "en": "Dust blocking the vents and dried thermal paste. Very common here, and it gets worse every summer.",
-        "ar": "غبار يسدّ الفتحات ومعجون حراري جفّ، وهذا شائع هنا ويزداد كلّ صيف."
+        "en": "Dust blocking the vents and dried thermal paste. Very common in hot climates, and it gets worse every summer.",
+        "ar": "غبار يسدّ الفتحات ومعجون حراري جفّ، وهذا شائع في المناخات الحارّة ويزداد كلّ صيف."
       },
       "self": [
         {
@@ -821,14 +860,13 @@ const TRIAGE = {
   }
 };
 
-
 /* Left deliberately unset. Inventing a price or a phone number on a page
    customers will act on is worse than leaving it out, and a gate fails the
    build if either is filled with a placeholder. */
 const CONTACT = {
-  email: "mail@eworldq8.com",
-  phone: null,
-  whatsapp: null,
-  hours: null,
-  address: null,
+  "email": "mail@eworldq8.com",
+  "phone": null,
+  "whatsapp": null,
+  "hours": null,
+  "address": null
 };

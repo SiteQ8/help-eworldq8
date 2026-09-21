@@ -49,8 +49,10 @@
   function renderServices() {
     const box = $("#svcs");
     box.textContent = "";
-    SERVICES.forEach((s) => {
-      const li = el("li", "svc");
+    SERVICES.forEach((s, i) => {
+      const li = el("li", "svc" + (i === 0 || i === 3 ? " is-wide" : ""));
+      li.appendChild(el("span", "svc-tag" + (s.remote ? " is-remote" : ""),
+        ui(s.remote ? "remoteTag" : "handsTag")));
       li.appendChild(el("h3", null, t(s.name)));
       li.appendChild(el("p", null, t(s.blurb)));
       box.appendChild(li);
@@ -100,11 +102,16 @@
     TRIAGE.devices.forEach((d) => box.appendChild(optionButton(t(d.label), () => pickDevice(d.key))));
   }
 
+  function step(n) {
+    $("#ask-step").textContent = ui("stepOf") + " " + n + " " + ui("of") + " 2";
+  }
+
   function reset() {
     device = null;
     q1().hidden = false;
     q2().hidden = true;
     out().hidden = true;
+    step(1);
   }
 
   function pickDevice(key) {
@@ -114,6 +121,7 @@
     TRIAGE.symptoms[key].forEach((s) =>
       box.appendChild(optionButton(t(s.label), () => pickSymptom(s.key, t(s.label)))));
     q1().hidden = true; q2().hidden = false; out().hidden = true;
+    step(2);
     q2().scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
@@ -157,6 +165,7 @@
 
   $("#back").addEventListener("click", () => {
     q2().hidden = true; out().hidden = true; q1().hidden = false;
+    step(1);
     q1().scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
   $("#lang").addEventListener("click", () => setLanguage(lang === "ar" ? "en" : "ar"));

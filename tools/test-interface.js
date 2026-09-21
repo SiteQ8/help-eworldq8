@@ -35,10 +35,18 @@ let url;
   /* ---------- the page ---------- */
   T('services render', await p.evaluate(() => document.querySelectorAll('.svc').length === 6));
   T('no undefined anywhere', await p.evaluate(() => !document.body.innerText.includes('undefined')));
+  /* the triage sits inside the hero now, so the first thing to tap is the
+     first device option, and it has to be on screen without scrolling */
   T('the first action is above the fold', await p.evaluate(() => {
-    const b = document.querySelector('.hero .btn').getBoundingClientRect();
+    const b = document.querySelector('#devices .opt').getBoundingClientRect();
     return b.top < innerHeight && b.height > 40;
   }));
+  T('the step counter reads step 1 of 2', await p.evaluate(() =>
+    /1 .* 2/.test(document.getElementById('ask-step').textContent)));
+  T('every service is tagged remote or hands on', await p.evaluate(() =>
+    [...document.querySelectorAll('.svc')].every(s => s.querySelector('.svc-tag')?.textContent.trim().length > 0)));
+  T('nothing on the page assumes a place', await p.evaluate(() =>
+    !/kuwait|الكويت|bring it in|أحضره/i.test(document.body.innerText)));
 
   /* ---------- every triage path, in both languages ----------
      48 walks. A dead end sends a customer away with nothing, and a path that
@@ -139,7 +147,7 @@ let url;
       return { label, ratio: +r.toFixed(2), need, pass: r >= need, px: +size.toFixed(1) };
     };
     return [check('.lede', 'lede'), check('.fine', 'fine print'), check('.kicker', 'kicker'),
-            check('.svc p', 'service text'), check('.opt', 'option button'),
+            check('.svc:not(.is-wide) p', 'service text'), check('.svc.is-wide p', 'wide card text'), check('.opt', 'option button'), check('.svc-tag.is-remote', 'remote tag'),
             check('.cta', 'header button'), check('.steps li', 'step'),
             check('.contact-what', 'contact label'), check('.lang', 'language button')];
   });
