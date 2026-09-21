@@ -16,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "content"))
 from guides import CATEGORIES, GUIDES  # noqa: E402
 
-BASE = "https://siteq8.github.io/help-eworldq8/"
+BASE = "https://help.eworldq8.com/"
 CAT = {c["key"]: c for c in CATEGORIES}
 
 UI = {

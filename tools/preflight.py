@@ -50,20 +50,22 @@ def gate_attribution():
     return hits == 0
 
 
-def gate_no_custom_domain_yet():
+def gate_custom_domain_bound():
     """
-    help.eworldq8.com has no DNS record. Binding it now would make GitHub
-    redirect the working github.io address to one that does not resolve,
-    which is exactly how a live site disappears.
+    help.eworldq8.com resolves to GitHub Pages now, so the CNAME file has to
+    be present and the canonical has to match it. This gate used to assert
+    the opposite while the DNS record carried a typo.
     """
-    if (ROOT / "CNAME").exists():
-        failures.append("CNAME is present, but help.eworldq8.com has no DNS record yet")
-        return False
-    line = [l for l in html().splitlines() if 'rel="canonical"' in l]
-    if line and "siteq8.github.io/help-eworldq8" not in line[0]:
-        failures.append("the canonical points somewhere the site is not served from")
-        return False
-    return True
+    ok = True
+    c = ROOT / "CNAME"
+    if not c.exists() or c.read_text(encoding="utf-8").strip() != "help.eworldq8.com":
+        failures.append("CNAME must contain help.eworldq8.com")
+        ok = False
+    for line in html().splitlines():
+        if 'rel="canonical"' in line and "https://help.eworldq8.com/" not in line:
+            failures.append("the canonical does not point at help.eworldq8.com")
+            ok = False
+    return ok
 
 
 def gate_nojekyll():
@@ -301,7 +303,7 @@ def gate_internal_links_resolve():
 GATES = [
     ("unicode dashes", gate_unicode_dashes),
     ("attribution", gate_attribution),
-    ("no custom domain yet", gate_no_custom_domain_yet),
+    ("custom domain bound", gate_custom_domain_bound),
     (".nojekyll", gate_nojekyll),
     ("no invented details", gate_no_invented_details),
     ("promises are kept", gate_promises_are_kept),
