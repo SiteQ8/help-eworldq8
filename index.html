@@ -3,27 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>eWorld Help :: computer, laptop and website help in Kuwait</title>
-<meta name="description" content="Everyday computing help. We build and check websites, fix laptops and desktops, recover files and set things up. Tell us what is happening and we will tell you what it usually is.">
+<title>eWorld Help :: computer, laptop and website help</title>
+<meta name="description" content="Everyday computing help, wherever you are. Websites built and checked, laptops and desktops fixed, files recovered, things set up. Tell us what is happening and we will tell you what it usually is.">
 <link rel="canonical" href="https://siteq8.github.io/help-eworldq8/">
-<meta name="theme-color" content="#0f4c81">
+<meta name="theme-color" content="#f6f4ee">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://siteq8.github.io/help-eworldq8/">
 <meta property="og:title" content="eWorld Help">
-<meta property="og:description" content="Computer, laptop and website help. Tell us what is happening and we will tell you what it usually is.">
+<meta property="og:description" content="Computer, laptop and website help, wherever you are. Tell us what is happening and we will tell you what it usually is.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 
 <body>
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#ask">Skip to content</a>
 
 <header class="top">
   <div class="shell top-in">
-    <a class="brand" href="./"><b>eWorld</b> <span data-t="brandHelp">Help</span></a>
+    <a class="brand" href="./"><i class="brand-mark" aria-hidden="true"></i><b>eWorld</b> <span data-t="brandHelp">Help</span></a>
     <div class="top-right">
       <button class="lang" id="lang" type="button" lang="ar">العربية</button>
       <a class="cta" href="#ask" data-t="getHelp">Get help</a>
@@ -33,65 +33,74 @@
 
 <main id="main">
 
+  <!-- ================= hero, with the triage inside it ================= -->
   <section class="hero">
-    <div class="shell">
-      <h1 data-t="heroH">Something broken? Start here.</h1>
-      <p class="lede" data-t="heroP"></p>
-      <a class="btn btn-lg" href="#ask" data-t="heroBtn"></a>
-      <p class="fine" data-t="heroFine"></p>
+    <div class="shell hero-in">
+      <div class="hero-copy">
+        <p class="eyebrow" data-t="heroEyebrow">Everyday computing help</p>
+        <h1 data-t="heroH">Something broken? Tell us.</h1>
+        <p class="lede" data-t="heroP">Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs a proper look.</p>
+        <p class="fine" data-t="heroFine">Free to ask. No charge until you agree to the work.</p>
+      </div>
+
+      <div class="ask" id="ask" aria-labelledby="ask-h">
+        <div class="ask-top">
+          <span class="kicker" data-t="askKicker">Start here</span>
+          <span class="ask-step" id="ask-step" aria-live="polite"></span>
+        </div>
+        <h2 id="ask-h" data-t="askH">Two questions.</h2>
+
+        <div class="q" id="q1">
+          <p class="q-label" data-t="q1">What are we looking at?</p>
+          <div class="opts" id="devices"></div>
+        </div>
+
+        <div class="q" id="q2" hidden>
+          <p class="q-label" data-t="q2">What is it doing?</p>
+          <div class="opts" id="symptoms"></div>
+          <button class="back" id="back" type="button" data-t="back">Back</button>
+        </div>
+
+        <div class="result" id="result" hidden></div>
+      </div>
     </div>
   </section>
 
-  <!-- ================= triage ================= -->
-  <section class="ask" id="ask">
-    <div class="shell">
-      <p class="kicker" data-t="askKicker"></p>
-      <h2 data-t="askH"></h2>
-
-      <div class="q" id="q1">
-        <p class="q-label" data-t="q1"></p>
-        <div class="opts" id="devices"></div>
-      </div>
-
-      <div class="q" id="q2" hidden>
-        <p class="q-label" data-t="q2"></p>
-        <div class="opts" id="symptoms"></div>
-        <button class="back" id="back" type="button" data-t="back"></button>
-      </div>
-
-      <div class="result" id="result" hidden></div>
-    </div>
-  </section>
-
-  <!-- ================= services ================= -->
+  <!-- ================= services, bento ================= -->
   <section class="block" id="services">
     <div class="shell">
-      <p class="kicker" data-t="svcKicker"></p>
-      <h2 data-t="svcH"></h2>
-      <ul class="svcs" id="svcs"></ul>
+      <p class="kicker" data-t="svcKicker">What we do</p>
+      <h2 data-t="svcH">Six things, done properly.</h2>
+      <ul class="bento" id="svcs"></ul>
     </div>
   </section>
 
   <!-- ================= how ================= -->
   <section class="block alt" id="how">
     <div class="shell">
-      <p class="kicker" data-t="howKicker"></p>
-      <h2 data-t="howH"></h2>
+      <p class="kicker" data-t="howKicker">How it works</p>
+      <h2 data-t="howH">No surprises.</h2>
       <ol class="steps">
-        <li data-t="step1"></li>
-        <li data-t="step2"></li>
-        <li data-t="step3"></li>
+        <li><i>1</i><p data-t="step1">Tell us what is happening. Email, or use the two questions above. Photos of any error message help more than you would think.</p></li>
+        <li><i>2</i><p data-t="step2">We tell you what it is and what it costs. Before any work starts, not after. If it is not worth repairing we will say so.</p></li>
+        <li><i>3</i><p data-t="step3">You decide. If you say no, you pay nothing. If you say yes, the price does not move unless we find something new and ask you first.</p></li>
       </ol>
     </div>
   </section>
 
-  <!-- ================= contact ================= -->
+  <!-- ================= reach ================= -->
   <section class="block" id="contact">
-    <div class="shell">
-      <p class="kicker" data-t="contactKicker"></p>
-      <h2 data-t="contactH"></h2>
-      <div class="contact" id="contact-list"></div>
-      <p class="fine" id="contact-note"></p>
+    <div class="shell reach">
+      <div>
+        <p class="kicker" data-t="contactKicker">Get in touch</p>
+        <h2 data-t="reachH">Wherever you are.</h2>
+        <p class="reach-p" data-t="reachRemote">Websites, setup, slow machines and most problems can be sorted remotely, so it does not matter where you are.</p>
+        <p class="reach-p" data-t="reachLocal">Hardware that needs hands on it, a dead board or a cracked screen, we arrange in person or through a courier.</p>
+      </div>
+      <div>
+        <div class="contact" id="contact-list"></div>
+        <p class="fine" id="contact-note"></p>
+      </div>
     </div>
   </section>
 
@@ -99,8 +108,8 @@
 
 <footer class="foot">
   <div class="shell foot-in">
-    <p><b>eWorld</b> Help</p>
-    <p data-t="footPlace"></p>
+    <p><b>eWorld</b> <span data-t="brandHelp">Help</span></p>
+    <p data-t="footPlace">Online anywhere. In person by arrangement.</p>
   </div>
 </footer>
 
