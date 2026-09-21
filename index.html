@@ -4,69 +4,92 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>eWorld Help :: computer, laptop and website help</title>
-<meta name="description" content="Everyday computing help, wherever you are. Websites built and checked, laptops and desktops fixed, files recovered, things set up. Tell us what is happening and we will tell you what it usually is.">
+<meta name="description" content="Guides you can follow yourself for laptops, phones, websites, files and Wi-Fi. Search the problem, answer two questions, or ask us in your own words.">
 <link rel="canonical" href="https://siteq8.github.io/help-eworldq8/">
-<meta name="theme-color" content="#f6f4ee">
+<meta name="theme-color" content="#f6f8fb">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://siteq8.github.io/help-eworldq8/">
 <meta property="og:title" content="eWorld Help">
-<meta property="og:description" content="Computer, laptop and website help, wherever you are. Tell us what is happening and we will tell you what it usually is.">
+<meta property="og:description" content="Guides you can follow yourself, a two question triage, and a way to ask in your own words.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 
 <body>
-<a class="skip" href="#ask">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a>
 
 <header class="top">
   <div class="shell top-in">
-    <a class="brand" href="./"><i class="brand-mark" aria-hidden="true"></i><b>eWorld</b> <span data-t="brandHelp">Help</span></a>
-    <div class="top-right">
+    <a class="brand" href="./" aria-label="eWorld Help">
+      <img src="assets/img/logo.png" srcset="assets/img/logo@2x.png 2x" alt="eWorld" width="520" height="101">
+      <span class="brand-help" data-t="brandHelp">Help</span>
+    </a>
+    <nav class="top-nav" aria-label="Primary">
+      <a class="top-link" href="guides/" data-t="navGuides">Guides</a>
       <button class="lang" id="lang" type="button" lang="ar">العربية</button>
       <a class="cta" href="#ask" data-t="getHelp">Get help</a>
-    </div>
+    </nav>
   </div>
 </header>
 
 <main id="main">
 
-  <!-- ================= hero, with the triage inside it ================= -->
+  <!-- ================= search first ================= -->
   <section class="hero">
-    <div class="shell hero-in">
-      <div class="hero-copy">
-        <p class="eyebrow" data-t="heroEyebrow">Everyday computing help</p>
-        <h1 data-t="heroH">Something broken? Tell us.</h1>
-        <p class="lede" data-t="heroP">Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs a proper look.</p>
-        <p class="fine" data-t="heroFine">Free to ask. No charge until you agree to the work.</p>
-      </div>
+    <div class="shell">
+      <p class="eyebrow" data-t="heroEyebrow">Everyday computing help</p>
+      <h1 data-t="heroH">Something broken? Tell us.</h1>
+      <p class="lede" data-t="heroP">Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs a proper look.</p>
 
-      <div class="ask" id="ask" aria-labelledby="ask-h">
+      <form class="search" id="search" role="search" autocomplete="off">
+        <label class="search-label" for="q" data-t="searchLabel">What is the problem?</label>
+        <div class="search-row">
+          <input class="search-in" id="q" type="search" name="q" placeholder="" data-ph="searchPh" aria-describedby="search-hint">
+          <button class="search-go" type="submit" aria-label="Search"><i></i></button>
+        </div>
+        <p class="fine" id="search-hint" data-t="heroFine">Free to ask. No charge until you agree to the work.</p>
+        <ol class="hits" id="hits" hidden></ol>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= browse ================= -->
+  <section class="block" id="browse">
+    <div class="shell">
+      <p class="kicker" data-t="browseKicker">Browse by topic</p>
+      <h2 data-t="browseH">Guides you can follow yourself.</h2>
+      <ul class="cats" id="cats"></ul>
+      <p class="more"><a href="guides/" data-t="allGuides">See all guides</a></p>
+    </div>
+  </section>
+
+  <!-- ================= triage ================= -->
+  <section class="block alt" id="ask">
+    <div class="shell">
+      <div class="askbox" aria-labelledby="ask-h">
         <div class="ask-top">
           <span class="kicker" data-t="askKicker">Start here</span>
           <span class="ask-step" id="ask-step" aria-live="polite"></span>
         </div>
         <h2 id="ask-h" data-t="askH">Two questions.</h2>
-
         <div class="q" id="q1">
           <p class="q-label" data-t="q1">What are we looking at?</p>
           <div class="opts" id="devices"></div>
         </div>
-
         <div class="q" id="q2" hidden>
           <p class="q-label" data-t="q2">What is it doing?</p>
           <div class="opts" id="symptoms"></div>
           <button class="back" id="back" type="button" data-t="back">Back</button>
         </div>
-
         <div class="result" id="result" hidden></div>
       </div>
     </div>
   </section>
 
-  <!-- ================= services, bento ================= -->
+  <!-- ================= services ================= -->
   <section class="block" id="services">
     <div class="shell">
       <p class="kicker" data-t="svcKicker">What we do</p>
@@ -88,19 +111,25 @@
     </div>
   </section>
 
-  <!-- ================= reach ================= -->
+  <!-- ================= ask form ================= -->
   <section class="block" id="contact">
     <div class="shell reach">
       <div>
-        <p class="kicker" data-t="contactKicker">Get in touch</p>
-        <h2 data-t="reachH">Wherever you are.</h2>
+        <p class="kicker" data-t="askFormKicker">Ask us</p>
+        <h2 data-t="askFormH">Still stuck? Tell us in your own words.</h2>
+        <p class="reach-p" data-t="askFormP">This opens an email to us with what you write below already filled in. Nothing is sent until you press send in your mail app.</p>
         <p class="reach-p" data-t="reachRemote">Websites, setup, slow machines and most problems can be sorted remotely, so it does not matter where you are.</p>
         <p class="reach-p" data-t="reachLocal">Hardware that needs hands on it, a dead board or a cracked screen, we arrange in person or through a courier.</p>
-      </div>
-      <div>
         <div class="contact" id="contact-list"></div>
         <p class="fine" id="contact-note"></p>
       </div>
+      <form class="askform" id="askform" novalidate>
+        <label><span data-t="fName">Your name</span><input type="text" name="name" autocomplete="name"></label>
+        <label><span data-t="fDevice">What is it about?</span><select name="device" id="f-device"></select></label>
+        <label><span data-t="fWhat">What is happening?</span><textarea name="what" rows="5" required data-ph="fWhatPh"></textarea></label>
+        <p class="form-err" id="form-err" hidden data-t="fNeed">Say what is happening first, even one line.</p>
+        <button class="btn" type="submit" data-t="fSend">Open the email</button>
+      </form>
     </div>
   </section>
 
@@ -108,12 +137,13 @@
 
 <footer class="foot">
   <div class="shell foot-in">
-    <p><b>eWorld</b> <span data-t="brandHelp">Help</span></p>
+    <img src="assets/img/logo-white.png" alt="eWorld" width="160" height="31" class="foot-logo">
     <p data-t="footPlace">Online anywhere. In person by arrangement.</p>
   </div>
 </footer>
 
 <script src="assets/data.js"></script>
+<script src="assets/site.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>
