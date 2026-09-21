@@ -34,7 +34,7 @@ UI = {
 }
 
 
-def shell(title_en, title_ar, body, depth, description_en):
+def shell(title_en, title_ar, body, depth, description_en, rel=""):
     """The chrome every page shares. depth is how many folders deep the page
     sits, so asset paths stay relative and the site works at any base."""
     up = "../" * depth
@@ -45,6 +45,7 @@ def shell(title_en, title_ar, body, depth, description_en):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title_en)} :: eWorld Help</title>
 <meta name="description" content="{esc(description_en)}">
+<link rel="canonical" href="{BASE}{rel}">
 <meta name="theme-color" content="#f6f8fb">
 <link rel="icon" href="{up}assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,7 +135,7 @@ def guide_page(g):
     {both(UI["notDiagnosis"], "guide-fine")}
   </article>
 """
-    return shell(g["title"]["en"], g["title"]["ar"], body, 2, g["summary"]["en"])
+    return shell(g["title"]["en"], g["title"]["ar"], body, 2, g["summary"]["en"], f"guides/{g['slug']}/")
 
 
 def guides_index():
@@ -164,7 +165,7 @@ def guides_index():
   <div class="shell">{''.join(groups)}
   </div>
 """
-    return shell("Guides", "الأدلّة", body, 1, UI["guidesLede"]["en"])
+    return shell("Guides", "الأدلّة", body, 1, UI["guidesLede"]["en"], "guides/")
 
 
 def search_index():
