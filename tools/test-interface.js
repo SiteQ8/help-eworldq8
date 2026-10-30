@@ -6,7 +6,7 @@ const http = require('http');
 const fs = require('fs');
 
 const ROOT = path.resolve(__dirname, '..');
-const TYPES = { '.html':'text/html', '.css':'text/css', '.js':'text/javascript', '.svg':'image/svg+xml', '.json':'application/json', '.png':'image/png' };
+const TYPES = { '.html':'text/html', '.css':'text/css', '.js':'text/javascript', '.svg':'image/svg+xml', '.json':'application/json', '.png':'image/png', '.jpg':'image/jpeg' };
 const server = http.createServer((req, res) => {
   const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
   let file = path.join(ROOT, rel);
@@ -36,7 +36,7 @@ let url;
   await p.evaluate(() => document.fonts.ready);
 
   /* ---------- the page ---------- */
-  T('services render', await p.evaluate(() => document.querySelectorAll('.svc').length === 6));
+  T('services render as a board of six tiles', await p.evaluate(() => document.querySelectorAll('.board .tile').length === 6));
   T('no undefined anywhere', await p.evaluate(() => !document.body.innerText.includes('undefined')));
   /* the triage sits inside the hero now, so the first thing to tap is the
      first device option, and it has to be on screen without scrolling */
@@ -50,8 +50,16 @@ let url;
   }));
   T('the step counter reads step 1 of 2', await p.evaluate(() =>
     /1 .* 2/.test(document.getElementById('ask-step').textContent)));
-  T('every service is tagged remote or hands on', await p.evaluate(() =>
-    [...document.querySelectorAll('.svc')].every(s => s.querySelector('.svc-tag')?.textContent.trim().length > 0)));
+  T('every service says remote or hands on', await p.evaluate(() =>
+    [...document.querySelectorAll('.board .tile')].every(s => /remote|hands on|عن بُعد|حضوري/i.test(s.textContent))));
+  /* the tiles are lazy loaded below the fold, so they are scrolled into view
+     and awaited; naturalWidth before that is 0 on a perfectly good image */
+  T('three service tiles carry a real picture', await p.evaluate(async () => {
+    const imgs = [...document.querySelectorAll('.tile.t-pic img')];
+    imgs[0] && imgs[0].scrollIntoView();
+    await Promise.all(imgs.map(i => i.complete ? null : new Promise(r => { i.onload = r; i.onerror = r; setTimeout(r, 4000); })));
+    return imgs.filter(i => i.naturalWidth > 0).length === 3;
+  }));
   T('nothing on the page assumes a place', await p.evaluate(() =>
     !/kuwait|الكويت|bring it in|أحضره/i.test(document.body.innerText)));
 
@@ -126,7 +134,7 @@ let url;
      Typing the problem is how most people arrive at a help site. Both
      languages have to reach the same guide, and nonsense has to say so
      rather than show nothing. */
-  await p.waitForFunction(() => document.querySelectorAll('#cats .cat').length === 6, { timeout: 5000 });
+  await p.waitForFunction(() => document.querySelectorAll('#gcol .grow').length === 14, { timeout: 5000 });
   const searches = [
     ['en', 'laptop will not turn on', 'laptop-will-not-turn-on'],
     ['en', 'deleted files', 'recover-deleted-files'],
@@ -152,10 +160,18 @@ let url;
   await p.fill('#q', '');
   await p.evaluate(() => { if (document.documentElement.lang !== 'en') document.getElementById('lang').click(); });
 
-  T('every category tile links to a section that exists', await p.evaluate(async () => {
-    const hrefs = [...document.querySelectorAll('#cats a')].map(a => a.getAttribute('href'));
-    const html = await (await fetch('guides/')).text();
-    return hrefs.length === 6 && hrefs.every(h => html.includes('id="' + h.split('#')[1] + '"'));
+  T('every guide row on the home page links to a page that exists', await p.evaluate(async () => {
+    const hrefs = [...document.querySelectorAll('#gcol .grow a')].map(a => a.getAttribute('href'));
+    const checks = await Promise.all(hrefs.map(h => fetch(h).then(r => r.ok)));
+    return hrefs.length === 14 && checks.every(Boolean);
+  }));
+  /* the stripe, the search field, the three lines and the band are all the one shape */
+  T('the motif runs the page: stripe, bars, three lines, band', await p.evaluate(() =>
+    document.querySelectorAll('.stripe i').length >= 12 && document.querySelectorAll('.band .bars i').length === 3
+    && document.querySelectorAll('.line').length === 3));
+  T('the hero picture holds the right half', await p.evaluate(() => {
+    const r = document.querySelector('.hero-pic').getBoundingClientRect();
+    return r.width >= innerWidth * 0.45 && r.height >= innerHeight * 0.9;
   }));
 
   /* ---------- the ask form composes an email, nothing more ---------- */
@@ -201,9 +217,9 @@ let url;
       const need = large ? 3.0 : 4.5, r = ratio(st.color, bgOf(e));
       return { label, ratio: +r.toFixed(2), need, pass: r >= need, px: +size.toFixed(1) };
     };
-    return [check('.lede', 'lede'), check('.fine', 'fine print'), check('.kicker', 'kicker'),
-            check('.svc:not(.is-wide) p', 'service text'), check('.svc.is-wide p', 'wide card text'), check('.opt', 'option button'), check('.svc-tag.is-remote', 'remote tag'), check('.cat-n', 'category count'), check('.foot p', 'footer'),
-            check('.cta', 'header button'), check('.steps li', 'step'),
+    return [check('.lede', 'lede'), check('.fine', 'fine print'), check('.ask-aside', 'ask aside'),
+            check('.tile:not(.t-head):not(.t-blue):not(.t-pic) p', 'service text'), check('.tile.t-head p', 'heading tile text'), check('.tile.t-blue p', 'blue tile text'), check('.opt', 'option button'), check('.grow-s', 'guide summary'), check('.line', 'how it works line'), check('.foot-note', 'footer'),
+            check('.cta', 'header button'),
             check('.contact-what', 'contact label'), check('.lang', 'language button')];
   });
   contrast.forEach(c => c.skipped ? T(`contrast ${c.label}`, false, 'not found')
@@ -232,7 +248,7 @@ let url;
     const en = await gp.evaluate(() => {
       const vis = s => [...document.querySelectorAll(s)].filter(e => e.getBoundingClientRect().height > 0).length;
       return {
-        title: document.querySelector('h1[data-lang="en"]')?.textContent.trim().length || 0,
+        title: document.querySelector('h1 [data-lang="en"]')?.textContent.trim().length || 0,
         steps: document.querySelectorAll('.guide-steps[data-lang="en"] li').length,
         arVisible: vis('[data-lang="ar"]'), ctasVisible: vis('.guide-stop a.btn'),
         cta: document.querySelector('.guide-stop a.btn[data-lang="en"]')?.getAttribute('href') || '',
@@ -245,7 +261,7 @@ let url;
       const vis = s => [...document.querySelectorAll(s)].filter(e => e.getBoundingClientRect().height > 0).length;
       return {
         dir: document.documentElement.dir,
-        title: document.querySelector('h1[data-lang="ar"]')?.textContent.trim().length || 0,
+        title: document.querySelector('h1 [data-lang="ar"]')?.textContent.trim().length || 0,
         enVisible: vis('[data-lang="en"]'), ctasVisible: vis('.guide-stop a.btn'),
         stepsVisible: vis('.guide-steps li'),
         steps: document.querySelectorAll('.guide-steps[data-lang="ar"] li').length,
@@ -258,6 +274,20 @@ let url;
     if (!(ar.enVisible === 0 && ar.ctasVisible === 1 && ar.stepsVisible === ar.steps)) bad.push(slug + ' (ar: both languages showing)');
     if (en.foot === ar.foot) bad.push(slug + ' (ar: strings did not swap)');
     if (slug === slugs[0]) {
+      /* the keep reading strip: three other guides, four different pictures on the page */
+      const more = await gp.evaluate(async () => {
+        const tiles = [...document.querySelectorAll('.more .ptile')];
+        for (const t of tiles) t.scrollIntoView();
+        await Promise.all([...document.querySelectorAll('.more img')].map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
+        const hrefs = tiles.map(t => t.querySelector('a').getAttribute('href'));
+        const pics = new Set([...document.querySelectorAll('main img')].filter(i => i.naturalWidth > 0).map(i => i.currentSrc.split('/').pop()));
+        const arTitles = [...document.querySelectorAll('.more .ptile-t[data-lang="ar"]')].filter(e => e.getBoundingClientRect().height > 0).length;
+        return { n: tiles.length, self: hrefs.filter(h => h === '../' + location.pathname.split('/').filter(Boolean).pop() + '/').length,
+                 distinct: new Set(hrefs).size, pics: pics.size, arTitles };
+      });
+      T('a guide ends with three other guides to read, each with its own picture',
+        more.n === 3 && more.distinct === 3 && more.self === 0 && more.pics >= 4 && more.arTitles === 3,
+        `${more.n} tiles, ${more.distinct} distinct, ${more.pics} pictures, ${more.arTitles} arabic titles showing`);
       /* contrast on the guide page itself, measured once */
       const gc = await gp.evaluate(() => {
         const srgb = v => { v /= 255; return v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
@@ -275,6 +305,45 @@ let url;
     await gp.close();
   }
   T(`every guide page renders in both languages`, bad.length === 0, bad.join(', ') || `${slugs.length} guides, both languages`);
+  /* the guides index: every guide as a picture row, grouped by topic, in both languages */
+  {
+    const gp = await b.newPage({ viewport: { width: 1180, height: 900 } });
+    gp.on('pageerror', e => errs.push(`guides index: ${e.message}`));
+    await gp.goto(url + 'guides/', { waitUntil: 'networkidle' });
+    const idx = await gp.evaluate(async () => {
+      const tiles = [...document.querySelectorAll('.gindex .ptile')];
+      for (const t of tiles) t.scrollIntoView();
+      await Promise.all([...document.querySelectorAll('.gindex img')].map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
+      const loaded = [...document.querySelectorAll('.gindex img')].filter(i => i.naturalWidth > 0).length;
+      const hrefs = tiles.map(t => t.querySelector('a').getAttribute('href'));
+      const pics = new Set([...document.querySelectorAll('.gindex img')].map(i => i.getAttribute('src'))).size;
+      return { tiles: tiles.length, loaded, groups: document.querySelectorAll('.gset').length, distinct: new Set(hrefs).size, pics,
+               overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+    });
+    T('the guides index shows every guide as a picture row', idx.tiles === 14 && idx.loaded === 14 && idx.distinct === 14 && idx.groups === 6 && idx.pics >= 6 && !idx.overflow,
+      `${idx.tiles} rows, ${idx.loaded} pictures loaded, ${idx.pics} different pictures, ${idx.groups} topics`);
+    await gp.evaluate(() => document.getElementById('lang').click());
+    const ar = await gp.evaluate(() => ({
+      dir: document.documentElement.dir,
+      en: [...document.querySelectorAll('.gindex [data-lang="en"]')].filter(e => e.getBoundingClientRect().height > 0).length,
+      ar: [...document.querySelectorAll('.gindex .ptile-t[data-lang="ar"]')].filter(e => e.getBoundingClientRect().height > 0).length,
+      overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    }));
+    T('the guides index reads in Arabic without overflow', ar.dir === 'rtl' && ar.en === 0 && ar.ar === 14 && !ar.overflow, `${ar.ar} arabic rows, ${ar.en} english showing`);
+    await gp.evaluate(() => document.getElementById('lang').click());
+    await gp.close();
+  }
+  /* a link can carry the language */
+  {
+    const gp = await b.newPage({ viewport: { width: 1180, height: 900 } });
+    await gp.goto(url + '?lang=ar', { waitUntil: 'networkidle' });
+    const a = await gp.evaluate(() => ({ lang: document.documentElement.lang, dir: document.documentElement.dir, h1: document.querySelector('h1').textContent }));
+    await gp.goto(url + 'guides/', { waitUntil: 'networkidle' });
+    const kept = await gp.evaluate(() => document.documentElement.lang);
+    T('?lang=ar opens the Arabic page and the choice sticks', a.lang === 'ar' && a.dir === 'rtl' && /[\u0600-\u06FF]/.test(a.h1) && kept === 'ar', `${a.h1}, next page ${kept}`);
+    await gp.evaluate(() => { try { localStorage.removeItem('help-lang'); } catch (e) {} });
+    await gp.close();
+  }
   // a fresh page has to come up in the remembered language
   {
     const gp = await b.newPage({ viewport: { width: 1180, height: 900 } });

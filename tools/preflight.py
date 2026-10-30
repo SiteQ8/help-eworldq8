@@ -11,7 +11,7 @@ import pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEXT = {".html", ".css", ".js", ".md", ".txt", ".xml", ".json", ".yml", ".yaml", ".svg"}
-SKIP = {".git", "node_modules"}
+SKIP = {".git", "node_modules", ".taste-skill"}   # the design tool's working folder is not the site
 DASHES = {"\u2012": "U+2012", "\u2013": "U+2013", "\u2014": "U+2014", "\u2015": "U+2015"}
 failures, notices = [], []
 

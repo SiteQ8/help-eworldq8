@@ -15,8 +15,8 @@ const UI = {
     "ar": "اطلب المساعدة"
   },
   "heroH": {
-    "en": "Something broken? Tell us.",
-    "ar": "في جهازك خلل؟ أخبرنا."
+    "en": "Something broken?",
+    "ar": "في جهازك خلل؟"
   },
   "heroP": {
     "en": "Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs a proper look.",
@@ -29,10 +29,6 @@ const UI = {
   "heroFine": {
     "en": "Free to ask. No charge until you agree to the work.",
     "ar": "السؤال مجاني، ولا رسوم حتى توافق على العمل."
-  },
-  "askKicker": {
-    "en": "Start here",
-    "ar": "ابدأ من هنا"
   },
   "askH": {
     "en": "Two questions.",
@@ -50,17 +46,9 @@ const UI = {
     "en": "Back",
     "ar": "رجوع"
   },
-  "svcKicker": {
-    "en": "What we do",
-    "ar": "ما نقوم به"
-  },
   "svcH": {
     "en": "Six things, done properly.",
     "ar": "ستّة أعمال نتقنها."
-  },
-  "howKicker": {
-    "en": "How it works",
-    "ar": "كيف نعمل"
   },
   "howH": {
     "en": "No surprises.",
@@ -77,10 +65,6 @@ const UI = {
   "step3": {
     "en": "You decide. If you say no, you pay nothing. If you say yes, the price does not move unless we find something new and ask you first.",
     "ar": "ثمّ تقرّر أنت، فإن رفضت لم تدفع شيئاً، وإن وافقت لم يتغيّر السعر إلا أن نجد أمراً جديداً ونستأذنك فيه أولاً."
-  },
-  "contactKicker": {
-    "en": "Get in touch",
-    "ar": "تواصل معنا"
   },
   "contactH": {
     "en": "Tell us what is happening.",
@@ -146,10 +130,6 @@ const UI = {
     "en": "العربية",
     "ar": "English"
   },
-  "heroEyebrow": {
-    "en": "Everyday computing help",
-    "ar": "مساعدة تقنية لكلّ يوم"
-  },
   "reachH": {
     "en": "Wherever you are.",
     "ar": "أينما كنت."
@@ -193,10 +173,6 @@ const UI = {
   "searchNone": {
     "en": "Nothing matched that. Try fewer words, or use the two questions below.",
     "ar": "لا شيء يطابق ذلك، فجرّب كلمات أقلّ أو استعمل السؤالين أدناه."
-  },
-  "browseKicker": {
-    "en": "Browse by topic",
-    "ar": "تصفّح حسب الموضوع"
   },
   "browseH": {
     "en": "Guides you can follow yourself.",
@@ -249,6 +225,30 @@ const UI = {
   "fNeed": {
     "en": "Say what is happening first, even one line.",
     "ar": "اكتب ما يحدث أولاً ولو سطراً واحداً."
+  },
+  "line1": {
+    "en": "First, you tell us what is happening.",
+    "ar": "أولاً تخبرنا بما يحدث."
+  },
+  "line2": {
+    "en": "Then we say what it is and what it costs.",
+    "ar": "ثم نخبرك بالعطل وبالتكلفة."
+  },
+  "line3": {
+    "en": "Then you decide.",
+    "ar": "ثم تقرّر أنت."
+  },
+  "credits": {
+    "en": "Pictures, via Wikimedia Commons",
+    "ar": "الصور من ويكيميديا كومنز"
+  },
+  "guidesLede": {
+    "en": "Written to be followed on your own, in the order you should actually do things. Every one ends with when to stop and ask.",
+    "ar": "كُتبت لتتّبعها بنفسك، بالترتيب الذي ينبغي أن تفعل به الأمور فعلاً، وكلّ دليل ينتهي بمتى تتوقّف وتسأل."
+  },
+  "askAside": {
+    "en": "For when you cannot name the problem. Pick the device, pick what it is doing, and read what it usually turns out to be and what to try first.",
+    "ar": "لمن لا يستطيع تسمية المشكلة، فاختر الجهاز ثم اختر ما يحدث له واقرأ ما يكون عليه العطل عادةً وما تجرّبه أولاً."
   }
 };
 
@@ -263,7 +263,8 @@ const SERVICES = [
       "en": "A site for your business, your shop or yourself. Written to load fast on a phone, because that is where most people will see it.",
       "ar": "موقع لعملك أو لمتجرك أو لك أنت، مكتوب ليفتح بسرعة على الهاتف لأنّ أغلب الناس سيرونه من هناك."
     },
-    "remote": true
+    "remote": true,
+    "tile": "t-6x4 t-head"
   },
   {
     "key": "website-check",
@@ -275,7 +276,8 @@ const SERVICES = [
       "en": "Is it slow, is it secure, does it work properly on a phone, does Google know it exists. You get a plain list of what is wrong and what it takes to fix.",
       "ar": "هل هو بطيء وهل هو آمن وهل يعمل كما ينبغي على الهاتف وهل تعرفه محركات البحث، فتحصل على قائمة واضحة بما فيه من خلل وبما يلزم لإصلاحه."
     },
-    "remote": true
+    "remote": true,
+    "tile": "t-3x2"
   },
   {
     "key": "laptop",
@@ -287,7 +289,10 @@ const SERVICES = [
       "en": "Will not start, running hot, screen gone, keyboard failing, slowed to a crawl, or liquid went where it should not.",
       "ar": "لا يعمل أو يسخن أو انطفأت شاشته أو تعطّلت لوحة مفاتيحه أو صار بطيئاً جداً أو انسكب عليه سائل."
     },
-    "remote": false
+    "remote": false,
+    "tile": "t-3x4 t-pic",
+    "pic": "usb-port.jpg",
+    "alt": "USB port solder points on a laptop motherboard, a screwdriver pointing at them"
   },
   {
     "key": "desktop",
@@ -299,7 +304,10 @@ const SERVICES = [
       "en": "Power problems, no display, crashes and blue screens, noisy fans, or a machine that has simply become too slow to use.",
       "ar": "مشاكل في الطاقة أو لا صورة على الشاشة أو توقّف وشاشات زرقاء أو مراوح عالية الصوت أو جهاز صار أبطأ من أن يُستعمل."
     },
-    "remote": false
+    "remote": false,
+    "tile": "t-3x2 t-pic",
+    "pic": "thermal-paste.jpg",
+    "alt": "The underside of a CPU cooler with thermal paste applied"
   },
   {
     "key": "data",
@@ -311,7 +319,8 @@ const SERVICES = [
       "en": "A drive that stopped being recognised, files deleted by accident, or a phone that will not turn on. Stop using the device and get in touch.",
       "ar": "قرص لم يعد الجهاز يتعرّف عليه أو ملفات حُذفت بالخطأ أو هاتف لا يشتغل، فأوقف استعمال الجهاز وتواصل معنا."
     },
-    "remote": false
+    "remote": false,
+    "tile": "t-3x2 t-blue"
   },
   {
     "key": "setup",
@@ -323,7 +332,10 @@ const SERVICES = [
       "en": "New machine, home or office network, printers, backups that actually run, and getting your accounts off one device and onto another.",
       "ar": "جهاز جديد أو شبكة للمنزل أو المكتب أو طابعات أو نسخ احتياطي يعمل فعلاً أو نقل حساباتك من جهاز إلى آخر."
     },
-    "remote": true
+    "remote": true,
+    "tile": "t-6x2 t-pic",
+    "pic": "network-cables.jpg",
+    "alt": "Network cables plugged into the back of a router"
   }
 ];
 
