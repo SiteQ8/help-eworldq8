@@ -6,16 +6,18 @@
 <title>eWorld Help :: computer, laptop and website help</title>
 <meta name="description" content="Guides you can follow yourself for laptops, phones, websites, files and Wi-Fi. Search the problem, answer two questions, or ask us in your own words.">
 <link rel="canonical" href="https://help.eworldq8.com/">
-<meta name="theme-color" content="#f6f8fb">
+<meta name="theme-color" content="#f4f6f9">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://help.eworldq8.com/">
 <meta property="og:title" content="eWorld Help">
 <meta property="og:description" content="Guides you can follow yourself, a two question triage, and a way to ask in your own words.">
+<meta property="og:image" content="https://help.eworldq8.com/assets/img/hard-disk.jpg">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="assets/styles.css">
+<script>document.documentElement.classList.add('js')</script>
 </head>
 
 <body>
@@ -30,51 +32,79 @@
     <nav class="top-nav" aria-label="Primary">
       <a class="top-link" href="guides/" data-t="navGuides">Guides</a>
       <button class="lang" id="lang" type="button" lang="ar">العربية</button>
-      <a class="cta" href="#ask" data-t="getHelp">Get help</a>
+      <a class="cta" href="#contact" data-t="getHelp">Get help</a>
     </nav>
   </div>
 </header>
 
 <main id="main">
 
-  <!-- ================= search first ================= -->
+  <!-- ============ hero: striped card beside the room ============ -->
   <section class="hero">
-    <div class="shell">
-      <p class="eyebrow" data-t="heroEyebrow">Everyday computing help</p>
-      <h1 data-t="heroH">Something broken? Tell us.</h1>
-      <p class="lede" data-t="heroP">Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs a proper look.</p>
+    <div class="hero-card">
+      <div class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="hero-body">
+        <h1 data-rise data-t="heroH">Something broken?</h1>
+        <p class="lede" data-rise data-t="heroP">Laptops, desktops, phones and websites. Tell us what is happening in your own words and we will tell you what it usually is, what you can try yourself, and when it needs a proper look.</p>
 
-      <form class="search" id="search" role="search" autocomplete="off">
-        <label class="search-label" for="q" data-t="searchLabel">What is the problem?</label>
-        <div class="search-row">
-          <input class="search-in" id="q" type="search" name="q" placeholder="" data-ph="searchPh" aria-describedby="search-hint">
-          <button class="search-go" type="submit" aria-label="Search"><i></i></button>
-        </div>
-        <p class="fine" id="search-hint" data-t="heroFine">Free to ask. No charge until you agree to the work.</p>
-        <ol class="hits" id="hits" hidden></ol>
-      </form>
+        <form class="search" id="search" role="search" autocomplete="off" data-rise>
+          <label class="search-label" for="q" data-t="searchLabel">What is the problem?</label>
+          <div class="search-row">
+            <input class="search-in" id="q" type="search" name="q" placeholder="" data-ph="searchPh" aria-describedby="search-hint">
+            <button class="search-go" type="submit" aria-label="Search"><i></i></button>
+          </div>
+          <p class="fine" id="search-hint" data-t="heroFine">Free to ask. No charge until you agree to the work.</p>
+          <ol class="hits" id="hits" hidden></ol>
+        </form>
+
+        <nav class="hero-links" aria-label="Sections">
+          <a href="#guides" data-t="navGuides">Guides</a>
+          <a href="#ask" data-t="askH">Two questions.</a>
+          <a href="#contact" data-t="askFormKicker">Ask us</a>
+        </nav>
+      </div>
+    </div>
+    <figure class="hero-pic">
+      <img src="assets/img/hard-disk.jpg" alt="An opened hard disk drive showing the platter and the read arm" width="1024" height="1280" decoding="async">
+    </figure>
+  </section>
+
+  <!-- ============ guides: two-ended rows ============ -->
+  <section class="block" id="guides">
+    <div class="shell">
+      <div class="block-head">
+        <h2 data-rise data-t="browseH">Guides you can follow yourself.</h2>
+        <p data-rise data-t="guidesLede">Written to be followed on your own, in the order you should actually do things. Every one ends with when to stop and ask.</p>
+      </div>
+      <div class="guides-split">
+        <div class="gcol" id="gcol"></div>
+        <figure class="gpic" data-rise>
+          <img src="assets/img/small-dust.jpg" alt="Dust packed into the grille of a laptop cooling fan, seen very close" width="1920" height="822" loading="lazy" decoding="async">
+        </figure>
+      </div>
     </div>
   </section>
 
-  <!-- ================= browse ================= -->
-  <section class="block" id="browse">
+  <!-- ============ how it works: lines that step across ============ -->
+  <section class="block tone" id="how">
     <div class="shell">
-      <p class="kicker" data-t="browseKicker">Browse by topic</p>
-      <h2 data-t="browseH">Guides you can follow yourself.</h2>
-      <ul class="cats" id="cats"></ul>
-      <p class="more"><a href="guides/" data-t="allGuides">See all guides</a></p>
+      <h2 data-rise data-t="howH">No surprises.</h2>
+      <div class="lines" style="margin-block-start: clamp(2rem, 4vw, 3.5rem)">
+        <p class="line" data-rise data-t="line1">First, you tell us what is happening.</p>
+        <p class="line" data-rise data-t="line2">Then we say what it is and what it costs.</p>
+        <p class="line" data-rise data-t="line3">Then you decide.</p>
+      </div>
+      <p class="lines-note" data-rise data-t="step3">You decide. If you say no, you pay nothing. If you say yes, the price does not move unless we find something new and ask you first.</p>
     </div>
   </section>
 
-  <!-- ================= triage ================= -->
-  <section class="block alt" id="ask">
+  <!-- ============ the two questions ============ -->
+  <section class="block" id="ask">
     <div class="shell">
-      <div class="askbox" aria-labelledby="ask-h">
-        <div class="ask-top">
-          <span class="kicker" data-t="askKicker">Start here</span>
-          <span class="ask-step" id="ask-step" aria-live="polite"></span>
-        </div>
-        <h2 id="ask-h" data-t="askH">Two questions.</h2>
+      <div class="ask-split">
+      <div class="ask" aria-labelledby="ask-h">
+        <h2 id="ask-h" data-rise data-t="askH">Two questions.</h2>
+        <p class="ask-step" id="ask-step" aria-live="polite"></p>
         <div class="q" id="q1">
           <p class="q-label" data-t="q1">What are we looking at?</p>
           <div class="opts" id="devices"></div>
@@ -86,59 +116,55 @@
         </div>
         <div class="result" id="result" hidden></div>
       </div>
-    </div>
-  </section>
-
-  <!-- ================= services ================= -->
-  <section class="block" id="services">
-    <div class="shell">
-      <p class="kicker" data-t="svcKicker">What we do</p>
-      <h2 data-t="svcH">Six things, done properly.</h2>
-      <ul class="bento" id="svcs"></ul>
-    </div>
-  </section>
-
-  <!-- ================= how ================= -->
-  <section class="block alt" id="how">
-    <div class="shell">
-      <p class="kicker" data-t="howKicker">How it works</p>
-      <h2 data-t="howH">No surprises.</h2>
-      <ol class="steps">
-        <li><i>1</i><p data-t="step1">Tell us what is happening. Email, or use the two questions above. Photos of any error message help more than you would think.</p></li>
-        <li><i>2</i><p data-t="step2">We tell you what it is and what it costs. Before any work starts, not after. If it is not worth repairing we will say so.</p></li>
-        <li><i>3</i><p data-t="step3">You decide. If you say no, you pay nothing. If you say yes, the price does not move unless we find something new and ask you first.</p></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ================= ask form ================= -->
-  <section class="block" id="contact">
-    <div class="shell reach">
-      <div>
-        <p class="kicker" data-t="askFormKicker">Ask us</p>
-        <h2 data-t="askFormH">Still stuck? Tell us in your own words.</h2>
-        <p class="reach-p" data-t="askFormP">This opens an email to us with what you write below already filled in. Nothing is sent until you press send in your mail app.</p>
-        <p class="reach-p" data-t="reachRemote">Websites, setup, slow machines and most problems can be sorted remotely, so it does not matter where you are.</p>
-        <p class="reach-p" data-t="reachLocal">Hardware that needs hands on it, a dead board or a cracked screen, we arrange in person or through a courier.</p>
-        <div class="contact" id="contact-list"></div>
-        <p class="fine" id="contact-note"></p>
+      <p class="ask-aside" data-rise data-t="askAside">For when you cannot name the problem. Pick the device, pick what it is doing, and read what it usually turns out to be and what to try first.</p>
       </div>
-      <form class="askform" id="askform" novalidate>
-        <label><span data-t="fName">Your name</span><input type="text" name="name" autocomplete="name"></label>
-        <label><span data-t="fDevice">What is it about?</span><select name="device" id="f-device"></select></label>
-        <label><span data-t="fWhat">What is happening?</span><textarea name="what" rows="5" required data-ph="fWhatPh"></textarea></label>
-        <p class="form-err" id="form-err" hidden data-t="fNeed">Say what is happening first, even one line.</p>
-        <button class="btn" type="submit" data-t="fSend">Open the email</button>
-      </form>
+    </div>
+  </section>
+
+  <!-- ============ services: close-ups on a board ============ -->
+  <section class="block tone" id="services">
+    <div class="shell">
+      <ul class="board" id="svcs"></ul>
+    </div>
+  </section>
+
+  <!-- ============ ask: the coupon ============ -->
+  <section class="block" id="contact">
+    <div class="shell">
+      <div class="coupon">
+        <div class="coupon-l">
+          <h2 data-rise data-t="askFormH">Still stuck? Tell us in your own words.</h2>
+          <p data-rise data-t="askFormP">This opens an email to us with what you write below already filled in. Nothing is sent until you press send in your mail app.</p>
+          <div class="contact" id="contact-list"></div>
+          <p class="fine" id="contact-note" style="color:#fff;opacity:.85"></p>
+        </div>
+        <form class="coupon-r askform" id="askform" novalidate>
+          <label><span data-t="fName">Your name</span><input type="text" name="name" autocomplete="name"></label>
+          <label><span data-t="fDevice">What is it about?</span><select name="device" id="f-device"></select></label>
+          <label><span data-t="fWhat">What is happening?</span><textarea name="what" rows="5" required data-ph="fWhatPh"></textarea></label>
+          <p class="form-err" id="form-err" hidden data-t="fNeed">Say what is happening first, even one line.</p>
+          <button class="btn" type="submit" data-t="fSend">Open the email</button>
+        </form>
+      </div>
     </div>
   </section>
 
 </main>
 
+<div class="band" aria-hidden="true"><div class="bars"><i></i><i></i><i></i></div></div>
+
 <footer class="foot">
-  <div class="shell foot-in">
-    <img src="assets/img/logo-white.png" alt="eWorld" width="160" height="31" class="foot-logo">
-    <p data-t="footPlace">Online anywhere. In person by arrangement.</p>
+  <div class="shell">
+    <img class="foot-mark" src="assets/img/logo-white.png" alt="eWorld" width="520" height="101" loading="lazy">
+    <div class="foot-grid">
+      <nav class="foot-links" aria-label="Footer">
+        <a href="guides/" data-t="navGuides">Guides</a>
+        <a href="#ask" data-t="askH">Two questions.</a>
+        <a href="#contact" data-t="askFormKicker">Ask us</a>
+      </nav>
+      <p class="foot-note" data-t="footPlace">Online anywhere. In person by arrangement.</p>
+    </div>
+    <p class="foot-credit" id="credits"></p>
   </div>
 </footer>
 

@@ -62,11 +62,6 @@
   $("#search").addEventListener("submit", (e) => { e.preventDefault(); runSearch(qIn.value); });
 
   /* ---------------- categories ---------------- */
-  const COUNTS = {};
-  fetch("search.json").then((r) => r.json()).then((d) => {
-    d.forEach((e) => { COUNTS[e.cat] = (COUNTS[e.cat] || 0) + 1; });
-    renderCats();
-  }).catch(renderCats);
 
   const CATS = [
     { key: "computers", en: "Laptops and desktops", ar: "الحواسيب المحمولة والمكتبية" },
@@ -76,29 +71,61 @@
     { key: "network",   en: "Wi-Fi and networks",   ar: "الواي فاي والشبكات" },
     { key: "safety",    en: "Staying safe online",  ar: "الأمان على الإنترنت" },
   ];
-  function renderCats() {
-    const box = $("#cats"); box.textContent = "";
-    CATS.forEach((c) => {
-      const li = el("li", "cat");
-      const a = el("a"); a.href = "guides/#" + c.key;
-      a.appendChild(el("span", "cat-name", t(c)));
-      const n = COUNTS[c.key];
-      if (n) a.appendChild(el("span", "cat-n", n + " " + ui("guideCount")));
-      li.appendChild(a); box.appendChild(li);
-    });
-  }
 
-  /* ---------------- services ---------------- */
+  /* ---------------- services: the board ---------------- */
   function renderServices() {
     const box = $("#svcs"); box.textContent = "";
-    SERVICES.forEach((s, i) => {
-      const li = el("li", "svc" + (i === 0 || i === 3 ? " is-wide" : ""));
-      li.appendChild(el("span", "svc-tag" + (s.remote ? " is-remote" : ""), ui(s.remote ? "remoteTag" : "handsTag")));
-      li.appendChild(el("h3", null, t(s.name)));
-      li.appendChild(el("p", null, t(s.blurb)));
+    SERVICES.forEach((s) => {
+      const li = el("li", "tile " + (s.tile || "t-3x2"));
+      if (s.tile && s.tile.includes("t-head")) {
+        li.appendChild(el("h2", null, ui("svcH")));
+        const body = el("div");
+        body.appendChild(el("h3", null, t(s.name)));
+        body.appendChild(el("p", null, ui(s.remote ? "remoteTag" : "handsTag") + ". " + t(s.blurb)));
+        li.appendChild(body);
+      } else if (s.pic) {
+        const img = document.createElement("img");
+        img.src = "assets/img/" + s.pic; img.alt = s.alt || ""; img.loading = "lazy"; img.decoding = "async";
+        img.width = 1000; img.height = 1000;
+        li.appendChild(img);
+        const cap = el("div", "tile-cap");
+        cap.appendChild(el("h3", null, t(s.name)));
+        cap.appendChild(el("p", null, ui(s.remote ? "remoteTag" : "handsTag") + ". " + t(s.blurb)));
+        li.appendChild(cap);
+      } else {
+        li.appendChild(el("p", "how", ui(s.remote ? "remoteTag" : "handsTag")));
+        li.appendChild(el("h3", null, t(s.name)));
+        li.appendChild(el("p", null, t(s.blurb)));
+      }
+      li.setAttribute("data-rise", "");
       box.appendChild(li);
     });
   }
+
+  /* ---------------- the guide column, from the search index ---------------- */
+  function renderGuideColumn(entries) {
+    const col = $("#gcol"); if (!col) return;
+    col.textContent = "";
+    CATS.forEach((c) => {
+      const mine = entries.filter((e) => e.cat === c.key);
+      if (!mine.length) return;
+      const g = el("div", "ggroup");
+      g.setAttribute("data-rise", "");
+      g.appendChild(el("p", "ggroup-h", t(c)));
+      const ul = el("ul", "grows");
+      mine.forEach((e) => {
+        const li = el("li", "grow");
+        const a = el("a"); a.href = "guides/" + e.slug + "/";
+        const tt = el("span", "grow-t", t(e.title));
+        tt.appendChild(el("span", "grow-s", t(e.summary)));
+        a.appendChild(tt);
+        li.appendChild(a); ul.appendChild(li);
+      });
+      g.appendChild(ul); col.appendChild(g);
+    });
+  }
+  let guideEntries = [];
+  fetch("search.json").then((r) => r.json()).then((d) => { guideEntries = d; renderGuideColumn(d); if (window.HelpRise) window.HelpRise(); }).catch(() => {});
 
   /* ---------------- contact ---------------- */
   function renderContact() {
@@ -196,8 +223,10 @@
 
   /* ---------------- render on language change ---------------- */
   function renderAll() {
-    renderCats(); renderServices(); renderContact(); renderForm(); renderDevices(); reset();
+    renderServices(); renderContact(); renderForm(); renderDevices(); reset();
+    renderGuideColumn(guideEntries);
     if (qIn.value) runSearch(qIn.value);
+    if (window.HelpRise) window.HelpRise();
   }
   document.addEventListener("lang:applied", renderAll);
   renderAll();
