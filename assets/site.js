@@ -75,6 +75,30 @@
   window.HelpRise = rise;
 
   /* ---------------- picture credits, in the footer ---------------- */
+  /* the header takes the colour of the chapter beneath it, switching as each
+     chapter's edge passes under it; only the header moves, never the page */
+  const top = document.getElementById("top");
+  if (top) {
+    let ticking = false;
+    const place = () => {
+      ticking = false;
+      /* read live: the sheets inside the services chapter are rendered later,
+         and the last element in document order that sits under the header is
+         the one on top */
+      const chapters = Array.from(document.querySelectorAll("[data-field]")).filter((n) => n !== top);
+      const y = top.offsetHeight * 0.5;
+      let field = null;
+      for (const c of chapters) { const r = c.getBoundingClientRect(); if (r.top <= y && r.bottom > y) field = c.dataset.field; }
+      if (!field && chapters.length) field = (chapters[0].getBoundingClientRect().top > y) ? chapters[0].dataset.field : chapters[chapters.length - 1].dataset.field;
+      if (field && top.dataset.field !== field) top.dataset.field = field;
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(place); } };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    document.addEventListener("lang:applied", onScroll);
+    place();
+  }
+
   const cred = document.getElementById("credits");
   if (cred) {
     fetch(document.querySelector('link[rel="stylesheet"][href$="styles.css"]').getAttribute("href").replace("styles.css", "credits.json"))
