@@ -1,6 +1,6 @@
 /* help.eworldq8.com :: home page
-   Search over the guides, the category tiles, the two question triage, the
-   services and the ask form. Language comes from site.js; this re-renders
+   Search over the guides, the topics as a poster list, the two question
+   triage, the services as sheets and the ask form. Language comes from site.js; this re-renders
    when it changes. */
 
 (function () {
@@ -61,84 +61,111 @@
   qIn.addEventListener("input", () => runSearch(qIn.value));
   $("#search").addEventListener("submit", (e) => { e.preventDefault(); runSearch(qIn.value); });
 
-  /* ---------------- categories ---------------- */
-
+  /* ---------------- topics ----------------
+     The six topics, one per poster line, with the picture of each topic's
+     world and the count of its guides. */
   const CATS = [
-    { key: "computers", en: "Laptops and desktops", ar: "الحواسيب المحمولة والمكتبية" },
-    { key: "phones",    en: "Phones and tablets",   ar: "الهواتف والأجهزة اللوحية" },
-    { key: "websites",  en: "Websites",             ar: "المواقع الإلكترونية" },
-    { key: "files",     en: "Files and backups",    ar: "الملفات والنسخ الاحتياطي" },
-    { key: "network",   en: "Wi-Fi and networks",   ar: "الواي فاي والشبكات" },
-    { key: "safety",    en: "Staying safe online",  ar: "الأمان على الإنترنت" },
+    { key: "computers", en: "Laptops and desktops", ar: "الحواسيب المحمولة والمكتبية", short: { en: "Computers", ar: "الحواسيب" },
+      pic: "usb-port.jpg", alt: "USB port solder points on a laptop motherboard" },
+    { key: "phones",    en: "Phones and tablets",   ar: "الهواتف والأجهزة اللوحية",   short: { en: "Phones",    ar: "الهواتف" },
+      pic: "phone-parts.jpg", alt: "A phone taken apart: the back cover and the main board" },
+    { key: "websites",  en: "Websites",             ar: "المواقع الإلكترونية",        short: { en: "Websites",  ar: "المواقع" },
+      pic: "servers.jpg", alt: "A rack of servers with network cables plugged in" },
+    { key: "files",     en: "Files and backups",    ar: "الملفات والنسخ الاحتياطي",   short: { en: "Files",     ar: "الملفات" },
+      pic: "hard-disk.jpg", alt: "An opened hard disk drive showing the platter and the read arm" },
+    { key: "network",   en: "Wi-Fi and networks",   ar: "الواي فاي والشبكات",         short: { en: "Wi-Fi",     ar: "الواي فاي" },
+      pic: "router-inside.jpg", alt: "The inside of a wireless router: its board and the antenna lead" },
+    { key: "safety",    en: "Staying safe online",  ar: "الأمان على الإنترنت",        short: { en: "Scams",     ar: "الاحتيال" },
+      pic: "keyboard.jpg", alt: "A laptop keyboard, seen very close" },
   ];
 
-  /* ---------------- services: the board ---------------- */
+  /* ---------------- services: sheets that stack ---------------- */
   function renderServices() {
     const box = $("#svcs"); box.textContent = "";
     SERVICES.forEach((s) => {
-      const li = el("li", "tile " + (s.tile || "t-3x2"));
-      if (s.tile && s.tile.includes("t-head")) {
-        li.appendChild(el("h2", null, ui("svcH")));
-        const body = el("div");
-        body.appendChild(el("h3", null, t(s.name)));
-        body.appendChild(el("p", null, ui(s.remote ? "remoteTag" : "handsTag") + ". " + t(s.blurb)));
-        li.appendChild(body);
-      } else if (s.pic) {
+      const li = el("li", "sheet");
+      li.dataset.field = ["blue-d", "white", "navy", "paper2", "ink", "paper"][box.children.length % 6];
+      const inner = el("div", "sheet-in");
+      inner.appendChild(el("h3", null, t(s.name)));
+      const body = el("div", "sheet-body");
+      body.appendChild(el("p", "sheet-how", ui(s.remote ? "remoteTag" : "handsTag")));
+      body.appendChild(el("p", "sheet-p", t(s.blurb)));
+      if (s.guides && s.guides.length && guideEntries.length) {
+        const ul = el("ul", "sheet-guides");
+        s.guides.forEach((slug) => { const e = guideEntries.find((x) => x.slug === slug); if (!e) return;
+          const li = el("li"); const ga = el("a", null, t(e.title)); ga.href = "guides/" + slug + "/"; li.appendChild(ga); ul.appendChild(li); });
+        if (ul.children.length) body.appendChild(ul);
+      }
+      inner.appendChild(body);
+      if (s.pic) {
+        const fig = el("div", "sheet-pic");
         const img = document.createElement("img");
         img.src = "assets/img/" + s.pic; img.alt = s.alt || ""; img.loading = "lazy"; img.decoding = "async";
         img.width = 1000; img.height = 1000;
-        li.appendChild(img);
-        const cap = el("div", "tile-cap");
-        cap.appendChild(el("h3", null, t(s.name)));
-        cap.appendChild(el("p", null, ui(s.remote ? "remoteTag" : "handsTag") + ". " + t(s.blurb)));
-        li.appendChild(cap);
-      } else {
-        li.appendChild(el("p", "how", ui(s.remote ? "remoteTag" : "handsTag")));
-        li.appendChild(el("h3", null, t(s.name)));
-        li.appendChild(el("p", null, t(s.blurb)));
+        fig.appendChild(img); inner.appendChild(fig);
       }
-      li.setAttribute("data-rise", "");
+      li.appendChild(inner);
       box.appendChild(li);
     });
   }
 
-  /* ---------------- the guide column, from the search index ---------------- */
-  function renderGuideColumn(entries) {
-    const col = $("#gcol"); if (!col) return;
-    col.textContent = "";
-    CATS.forEach((c) => {
+  /* ---------------- the poster list, from the search index ----------------
+     Pointing at a line brings its picture and its guides up in the frame
+     beside the list and dims the other lines. On a touch screen the frame
+     is not shown and each line carries its picture inline. */
+  let activeTopic = 0;
+  function renderTopics(entries) {
+    const list = $("#topics"), frame = $("#topic-frame"); if (!list || !frame) return;
+    list.textContent = ""; frame.textContent = "";
+    const shown = CATS.filter((c) => entries.some((e) => e.cat === c.key));
+    shown.forEach((c, i) => {
       const mine = entries.filter((e) => e.cat === c.key);
-      if (!mine.length) return;
-      const g = el("div", "ggroup");
-      g.setAttribute("data-rise", "");
-      g.appendChild(el("p", "ggroup-h", t(c)));
-      const ul = el("ul", "grows");
-      mine.forEach((e) => {
-        const li = el("li", "grow");
-        const a = el("a"); a.href = "guides/" + e.slug + "/";
-        const tt = el("span", "grow-t", t(e.title));
-        tt.appendChild(el("span", "grow-s", t(e.summary)));
-        a.appendChild(tt);
-        li.appendChild(a); ul.appendChild(li);
-      });
-      g.appendChild(ul); col.appendChild(g);
+      const li = el("li", "topic" + (i === activeTopic ? " active" : ""));
+      li.setAttribute("data-rise", "");
+      const a = el("a"); a.href = "guides/#" + c.key;
+      a.setAttribute("aria-label", t(c) + ", " + mine.length + " " + ui(mine.length === 1 ? "topicGuide" : "topicGuides"));
+      const main = el("span", "topic-main");
+      main.appendChild(el("span", "topic-w", t(c.short)));
+      a.appendChild(main);
+      a.appendChild(el("span", "topic-n", mine.length + " " + ui(mine.length === 1 ? "topicGuide" : "topicGuides")));
+      const show = () => { activeTopic = i; list.classList.add("has-active");
+        list.querySelectorAll(".topic").forEach((n, k) => n.classList.toggle("active", k === i));
+        frame.querySelectorAll(".frame-panel").forEach((n, k) => n.classList.toggle("on", k === i)); };
+      a.addEventListener("pointerenter", show);
+      a.addEventListener("focus", show);
+      li.appendChild(a); list.appendChild(li);
+
+      const panel = el("div", "frame-panel" + (i === activeTopic ? " on" : ""));
+      const fp = el("div", "frame-pic");
+      const fimg = document.createElement("img");
+      fimg.src = "assets/img/" + c.pic; fimg.alt = c.alt; fimg.loading = "lazy"; fimg.decoding = "async"; fimg.width = 1000; fimg.height = 750;
+      fp.appendChild(fimg); panel.appendChild(fp);
+      const ul = el("ul", "frame-list");
+      mine.forEach((e) => { const l = el("li"); const ga = el("a", null, t(e.title)); ga.href = "guides/" + e.slug + "/"; ga.tabIndex = -1; l.appendChild(ga); ul.appendChild(l); });
+      panel.appendChild(ul); frame.appendChild(panel);
     });
+    if (!list.dataset.bound) { list.dataset.bound = "1"; list.addEventListener("pointerleave", () => { list.classList.remove("has-active"); }); }
   }
   let guideEntries = [];
-  fetch("search.json").then((r) => r.json()).then((d) => { guideEntries = d; renderGuideColumn(d); if (window.HelpRise) window.HelpRise(); }).catch(() => {});
+  fetch("search.json").then((r) => r.json()).then((d) => { guideEntries = d; renderTopics(d); renderServices(); if (window.HelpRise) window.HelpRise(); }).catch(() => {});
 
   /* ---------------- contact ---------------- */
   function renderContact() {
     const list = $("#contact-list"); list.textContent = "";
     let shown = 0;
-    const add = (labelKey, value, href, ext) => {
-      const a = el("a", "contact-item"); a.href = href;
+    const add = (labelKey, value, href, ext, cls) => {
+      const a = el("a", "contact-item" + (cls ? " " + cls : "")); a.href = href;
       if (ext) { a.rel = "noopener"; a.target = "_blank"; }
-      a.appendChild(el("span", "contact-what", ui(labelKey)));
-      const b = el("b", null, value); b.dir = "ltr"; a.appendChild(b);
+      if (cls !== "contact-mail") a.appendChild(el("span", "contact-what", ui(labelKey)));
+      const b = el("b"); b.dir = "ltr";
+      /* the address is display type; on a phone it may break after the @ */
+      const at = value.indexOf("@");
+      if (cls === "contact-mail" && at > 0) { b.appendChild(document.createTextNode(value.slice(0, at + 1))); b.appendChild(document.createElement("wbr")); b.appendChild(document.createTextNode(value.slice(at + 1))); }
+      else b.textContent = value;
+      a.appendChild(b);
       list.appendChild(a); shown++;
     };
-    if (CONTACT.email) add("email", CONTACT.email, "mailto:" + CONTACT.email);
+    if (CONTACT.email) add("email", CONTACT.email, "mailto:" + CONTACT.email, false, "contact-mail");
     if (CONTACT.phone) add("phone", CONTACT.phone, "tel:" + CONTACT.phone.replace(/\s+/g, ""));
     if (CONTACT.whatsapp) add("whatsapp", CONTACT.whatsapp, "https://wa.me/" + CONTACT.whatsapp.replace(/\D/g, ""), true);
     $("#contact-note").textContent = ui(shown > 1 ? "noteMany" : "noteOne");
@@ -224,7 +251,7 @@
   /* ---------------- render on language change ---------------- */
   function renderAll() {
     renderServices(); renderContact(); renderForm(); renderDevices(); reset();
-    renderGuideColumn(guideEntries);
+    renderTopics(guideEntries);
     if (qIn.value) runSearch(qIn.value);
     if (window.HelpRise) window.HelpRise();
   }

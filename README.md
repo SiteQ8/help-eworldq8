@@ -9,29 +9,41 @@ opens from any link with `?lang=ar`, and the choice sticks on the next page.
 
 ## The design
 
-One shape runs through the whole site: the three bars of the eWorld E. The
-striped card the first screen opens with is that stripe; the search field is
-a bar; every guide step is marked with a bar; the three lines of how we work
-step across the page; the band above the footer is the three bars at full
-width; and the mark itself sits large at the foot of every page.
+Colour chapters. Every chapter of the home page is one flat field of a
+brand colour, floor to ceiling, holding one thing at full size, and the
+header takes the colour of the chapter beneath it as each edge passes under
+it. The idea: the page is written the way eWorld's own guides are, as steps
+in order, each marked by one bar of the E, and the last step is the line
+every guide ends with, when to stop and ask.
+
+1. Blue: "Something broken?" in two inks over the search, the first act.
+2. Paper: the six topics as a poster list, one word per line with the guide
+   count at the right; pointing at a line brings its picture and its guides
+   up in the frame beside the list.
+3. Deep blue: the two questions as tiles, the answer read in place.
+4. White: how it works as three tiles that grow, you tell us, we say what it
+   is and what it costs, you decide.
+5. The six services as sheets that stack like folders, each with its picture
+   and the guides that belong to it.
+6. Blue: still stuck, the form that composes an email, then the address as
+   display type.
+7. Ink: the E's three bars as the three ways in, and the mark.
 
 The pictures are real pictures of this subject's world, found in Wikimedia
 Commons under licences that allow commercial use, cropped to the site's
 sizes in `assets/img/` with the originals and their licences beside them in
 `assets/` and `assets/credits.json`. The credit line is built into the
 footer of every page from that file. Every guide carries the picture of its
-own subject (the keyboard for the spill, the inside of a router for Wi-Fi,
-a phone taken apart for the phone guides, a rack of servers for a website
-that is down), the same picture leads its row on the guides index, and
-each guide ends with the three nearest guides to read next.
+own subject, the same picture leads its row on the guides index, and each
+guide ends with the three nearest guides to read next.
 
-Motion is transform and opacity only: the parts of each section rise 20px
-into place as they enter, pictures settle from a slight scale, controls
-press down to 0.97, and hover is only wired where there is a pointer.
-Reduced motion keeps the fades and drops the travel. The measurements that
-hold this are run in a real browser (`tasteskill`'s inspector) at 1440,
-768 and 390 wide on the home page, the guides index and a guide page, in
-both languages: 0 failures.
+Motion is transform and opacity only: the parts of each chapter rise into
+place as they enter, pictures settle from a slight scale, controls press
+down to 0.97, the header recolours in 300ms, and hover is only wired where
+there is a pointer. Reduced motion keeps the fades and drops the travel.
+The measurements that hold this are run in a real browser (`tasteskill`'s
+inspector) at 1440, 768 and 390 wide on the home page, the guides index and
+a guide page, in both languages: 0 failures.
 
 ## What is on it
 
@@ -97,7 +109,7 @@ fails on a currency figure. No promises: a gate fails on "guaranteed",
 ```bash
 python3 tools/build.py        # after editing content/guides.py
 python3 tools/preflight.py    # 14 gates
-node tools/test-interface.js  # 69 checks
+node tools/test-interface.js  # 80 checks
 ```
 
 The suite walks all 24 triage paths in both languages, opens all fourteen
@@ -106,6 +118,8 @@ visible and the strings swapped, runs six searches across both alphabets,
 checks the form composes an email and refuses an empty one, checks the
 guides index shows every guide as a picture row and that a guide ends with
 three other guides with four different pictures on the page, checks that
-`?lang=ar` opens Arabic and sticks, and runs contrast, no-script, overflow
-and tap target checks. Each gate and the visibility check are negative
+`?lang=ar` opens Arabic and sticks, checks the poster list counts fourteen
+guides and brings up the right frame, that every sheet carries a picture
+and names its guides, that the header takes the chapter's colour, and runs
+contrast on every field, no-script, overflow and tap target checks. Each gate and the visibility check are negative
 tested.

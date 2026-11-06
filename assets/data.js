@@ -167,8 +167,8 @@ const UI = {
     "ar": "ما المشكلة؟"
   },
   "searchPh": {
-    "en": "Try \"laptop will not turn on\" or \"deleted files\"",
-    "ar": "جرّب \"لابتوب لا يعمل\" أو \"ملفات محذوفة\""
+    "en": "e.g. \"laptop will not turn on\"",
+    "ar": "مثلاً \"لابتوب لا يعمل\""
   },
   "searchNone": {
     "en": "Nothing matched that. Try fewer words, or use the two questions below.",
@@ -249,6 +249,34 @@ const UI = {
   "askAside": {
     "en": "For when you cannot name the problem. Pick the device, pick what it is doing, and read what it usually turns out to be and what to try first.",
     "ar": "لمن لا يستطيع تسمية المشكلة، فاختر الجهاز ثم اختر ما يحدث له واقرأ ما يكون عليه العطل عادةً وما تجرّبه أولاً."
+  },
+  "heroA": {
+    "en": "Something",
+    "ar": "في جهازك"
+  },
+  "heroB": {
+    "en": "broken?",
+    "ar": "خلل؟"
+  },
+  "stage1": {
+    "en": "You tell us",
+    "ar": "تخبرنا بما يحدث"
+  },
+  "stage2": {
+    "en": "We say what it is and what it costs",
+    "ar": "نخبرك بالعطل وبالتكلفة"
+  },
+  "stage3": {
+    "en": "You decide",
+    "ar": "تقرّر أنت"
+  },
+  "topicGuides": {
+    "en": "guides",
+    "ar": "أدلّة"
+  },
+  "topicGuide": {
+    "en": "guide",
+    "ar": "دليل"
   }
 };
 
@@ -264,7 +292,11 @@ const SERVICES = [
       "ar": "موقع لعملك أو لمتجرك أو لك أنت، مكتوب ليفتح بسرعة على الهاتف لأنّ أغلب الناس سيرونه من هناك."
     },
     "remote": true,
-    "tile": "t-6x4 t-head"
+    "pic": "servers.jpg",
+    "alt": "A rack of servers with network cables plugged in",
+    "guides": [
+      "website-is-slow"
+    ]
   },
   {
     "key": "website-check",
@@ -277,7 +309,13 @@ const SERVICES = [
       "ar": "هل هو بطيء وهل هو آمن وهل يعمل كما ينبغي على الهاتف وهل تعرفه محركات البحث، فتحصل على قائمة واضحة بما فيه من خلل وبما يلزم لإصلاحه."
     },
     "remote": true,
-    "tile": "t-3x2"
+    "pic": "rj45.jpg",
+    "alt": "The contacts of a network plug, seen very close",
+    "guides": [
+      "website-is-down",
+      "is-my-website-secure",
+      "website-is-slow"
+    ]
   },
   {
     "key": "laptop",
@@ -290,9 +328,13 @@ const SERVICES = [
       "ar": "لا يعمل أو يسخن أو انطفأت شاشته أو تعطّلت لوحة مفاتيحه أو صار بطيئاً جداً أو انسكب عليه سائل."
     },
     "remote": false,
-    "tile": "t-3x4 t-pic",
     "pic": "usb-port.jpg",
-    "alt": "USB port solder points on a laptop motherboard, a screwdriver pointing at them"
+    "alt": "USB port solder points on a laptop motherboard, a screwdriver pointing at them",
+    "guides": [
+      "laptop-will-not-turn-on",
+      "laptop-overheating",
+      "liquid-spilled-on-laptop"
+    ]
   },
   {
     "key": "desktop",
@@ -305,9 +347,12 @@ const SERVICES = [
       "ar": "مشاكل في الطاقة أو لا صورة على الشاشة أو توقّف وشاشات زرقاء أو مراوح عالية الصوت أو جهاز صار أبطأ من أن يُستعمل."
     },
     "remote": false,
-    "tile": "t-3x2 t-pic",
     "pic": "thermal-paste.jpg",
-    "alt": "The underside of a CPU cooler with thermal paste applied"
+    "alt": "The underside of a CPU cooler with thermal paste applied",
+    "guides": [
+      "blue-screen-and-restarts",
+      "computer-is-very-slow"
+    ]
   },
   {
     "key": "data",
@@ -320,7 +365,12 @@ const SERVICES = [
       "ar": "قرص لم يعد الجهاز يتعرّف عليه أو ملفات حُذفت بالخطأ أو هاتف لا يشتغل، فأوقف استعمال الجهاز وتواصل معنا."
     },
     "remote": false,
-    "tile": "t-3x2 t-blue"
+    "pic": "hard-disk.jpg",
+    "alt": "An opened hard disk drive showing the platter and the read arm",
+    "guides": [
+      "recover-deleted-files",
+      "set-up-a-backup"
+    ]
   },
   {
     "key": "setup",
@@ -333,9 +383,13 @@ const SERVICES = [
       "ar": "جهاز جديد أو شبكة للمنزل أو المكتب أو طابعات أو نسخ احتياطي يعمل فعلاً أو نقل حساباتك من جهاز إلى آخر."
     },
     "remote": true,
-    "tile": "t-6x2 t-pic",
     "pic": "network-cables.jpg",
-    "alt": "Network cables plugged into the back of a router"
+    "alt": "Network cables plugged into the back of a router",
+    "guides": [
+      "wifi-keeps-dropping",
+      "set-up-a-backup",
+      "phone-storage-full"
+    ]
   }
 ];
 

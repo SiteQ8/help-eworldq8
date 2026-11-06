@@ -36,7 +36,8 @@ let url;
   await p.evaluate(() => document.fonts.ready);
 
   /* ---------- the page ---------- */
-  T('services render as a board of six tiles', await p.evaluate(() => document.querySelectorAll('.board .tile').length === 6));
+  await p.waitForFunction(() => document.querySelectorAll('.sheets .sheet').length === 6, { timeout: 5000 });
+  T('services render as six sheets', await p.evaluate(() => document.querySelectorAll('.sheets .sheet').length === 6));
   T('no undefined anywhere', await p.evaluate(() => !document.body.innerText.includes('undefined')));
   /* the triage sits inside the hero now, so the first thing to tap is the
      first device option, and it has to be on screen without scrolling */
@@ -51,14 +52,16 @@ let url;
   T('the step counter reads step 1 of 2', await p.evaluate(() =>
     /1 .* 2/.test(document.getElementById('ask-step').textContent)));
   T('every service says remote or hands on', await p.evaluate(() =>
-    [...document.querySelectorAll('.board .tile')].every(s => /remote|hands on|عن بُعد|حضوري/i.test(s.textContent))));
-  /* the tiles are lazy loaded below the fold, so they are scrolled into view
-     and awaited; naturalWidth before that is 0 on a perfectly good image */
-  T('three service tiles carry a real picture', await p.evaluate(async () => {
-    const imgs = [...document.querySelectorAll('.tile.t-pic img')];
-    imgs[0] && imgs[0].scrollIntoView();
+    [...document.querySelectorAll('.sheets .sheet')].every(s => /remote|hands on|عن بُعد|حضوري/i.test(s.textContent))));
+  /* the sheet pictures are lazy loaded below the fold, so they are scrolled
+     into view and awaited; naturalWidth before that is 0 on a good image */
+  T('every service sheet carries a real picture and names its guides', await p.evaluate(async () => {
+    const imgs = [...document.querySelectorAll('.sheet-pic img')];
+    for (const i of imgs) i.scrollIntoView();
     await Promise.all(imgs.map(i => i.complete ? null : new Promise(r => { i.onload = r; i.onerror = r; setTimeout(r, 4000); })));
-    return imgs.filter(i => i.naturalWidth > 0).length === 3;
+    const links = [...document.querySelectorAll('.sheet-guides a')].map(a => a.getAttribute('href'));
+    window.scrollTo(0, 0);
+    return imgs.filter(i => i.naturalWidth > 0).length === 6 && links.length >= 10 && links.every(h => /^guides\/[a-z-]+\/$/.test(h));
   }));
   T('nothing on the page assumes a place', await p.evaluate(() =>
     !/kuwait|الكويت|bring it in|أحضره/i.test(document.body.innerText)));
@@ -134,7 +137,7 @@ let url;
      Typing the problem is how most people arrive at a help site. Both
      languages have to reach the same guide, and nonsense has to say so
      rather than show nothing. */
-  await p.waitForFunction(() => document.querySelectorAll('#gcol .grow').length === 14, { timeout: 5000 });
+  await p.waitForFunction(() => document.querySelectorAll('#topics .topic').length === 6, { timeout: 5000 });
   const searches = [
     ['en', 'laptop will not turn on', 'laptop-will-not-turn-on'],
     ['en', 'deleted files', 'recover-deleted-files'],
@@ -160,18 +163,42 @@ let url;
   await p.fill('#q', '');
   await p.evaluate(() => { if (document.documentElement.lang !== 'en') document.getElementById('lang').click(); });
 
-  T('every guide row on the home page links to a page that exists', await p.evaluate(async () => {
-    const hrefs = [...document.querySelectorAll('#gcol .grow a')].map(a => a.getAttribute('href'));
+  T('every guide in the topic frames links to a page that exists', await p.evaluate(async () => {
+    const hrefs = [...document.querySelectorAll('#topic-frame .frame-list a')].map(a => a.getAttribute('href'));
     const checks = await Promise.all(hrefs.map(h => fetch(h).then(r => r.ok)));
-    return hrefs.length === 14 && checks.every(Boolean);
+    return hrefs.length === 14 && new Set(hrefs).size === 14 && checks.every(Boolean);
   }));
-  /* the stripe, the search field, the three lines and the band are all the one shape */
-  T('the motif runs the page: stripe, bars, three lines, band', await p.evaluate(() =>
-    document.querySelectorAll('.stripe i').length >= 12 && document.querySelectorAll('.band .bars i').length === 3
-    && document.querySelectorAll('.line').length === 3));
-  T('the hero picture holds the right half', await p.evaluate(() => {
-    const r = document.querySelector('.hero-pic').getBoundingClientRect();
-    return r.width >= innerWidth * 0.45 && r.height >= innerHeight * 0.9;
+  /* the poster list: six topics, their counts add up to the fourteen guides,
+     and pointing at a line brings its frame up */
+  T('the six topics count fourteen guides between them', await p.evaluate(() => {
+    const ns = [...document.querySelectorAll('#topics .topic-n')].map(n => parseInt(n.textContent, 10));
+    return ns.length === 6 && ns.reduce((a, b) => a + b, 0) === 14 && ns.every(n => n >= 1);
+  }));
+  T('pointing at a topic brings up its picture and its guides', await p.evaluate(async () => {
+    const rows = [...document.querySelectorAll('#topics .topic a')];
+    rows[2].dispatchEvent(new PointerEvent('pointerenter', { bubbles: false }));
+    await new Promise(r => setTimeout(r, 300));
+    const on = document.querySelector('#topic-frame .frame-panel.on');
+    const idx = [...document.querySelectorAll('#topic-frame .frame-panel')].indexOf(on);
+    const active = document.querySelectorAll('#topics .topic.active').length;
+    const img = on && on.querySelector('img');
+    return idx === 2 && active === 1 && document.querySelector('#topics .topic:nth-child(3)').classList.contains('active') && img && on.querySelectorAll('.frame-list a').length === 3;
+  }));
+  /* the chapters: one field each, and the header takes the field beneath it */
+  T('the header takes the colour of the chapter beneath it', await p.evaluate(async () => {
+    const top = document.getElementById('top');
+    const before = top.dataset.field;
+    window.scrollTo(0, document.getElementById('ask').getBoundingClientRect().top + scrollY + 200);
+    await new Promise(r => requestAnimationFrame(() => setTimeout(r, 80)));
+    const mid = top.dataset.field;
+    window.scrollTo(0, 0);
+    await new Promise(r => requestAnimationFrame(() => setTimeout(r, 80)));
+    return before === 'blue' && mid === 'navy' && top.dataset.field === 'blue';
+  }));
+  T('the first screen is the statement in two inks over the search', await p.evaluate(() => {
+    const s1 = getComputedStyle(document.querySelector('.statement .s1')).color, s2 = getComputedStyle(document.querySelector('.statement .s2')).color;
+    const h = document.querySelector('.statement').getBoundingClientRect();
+    return s1 !== s2 && h.top < innerHeight * 0.4 && h.height > innerHeight * 0.25 && document.querySelectorAll('.stage').length === 3 && document.querySelectorAll('.mark a').length === 3;
   }));
 
   /* ---------- the ask form composes an email, nothing more ---------- */
@@ -217,10 +244,12 @@ let url;
       const need = large ? 3.0 : 4.5, r = ratio(st.color, bgOf(e));
       return { label, ratio: +r.toFixed(2), need, pass: r >= need, px: +size.toFixed(1) };
     };
-    return [check('.lede', 'lede'), check('.fine', 'fine print'), check('.ask-aside', 'ask aside'),
-            check('.tile:not(.t-head):not(.t-blue):not(.t-pic) p', 'service text'), check('.tile.t-head p', 'heading tile text'), check('.tile.t-blue p', 'blue tile text'), check('.opt', 'option button'), check('.grow-s', 'guide summary'), check('.line', 'how it works line'), check('.foot-note', 'footer'),
-            check('.cta', 'header button'),
-            check('.contact-what', 'contact label'), check('.lang', 'language button')];
+    return [check('.topics-lede', 'topics lede'), check('.ask-lede', 'ask lede'), check('.stop-head p', 'stop paragraph'),
+            check('.sheet:nth-child(1) .sheet-p', 'sheet text on blue'), check('.sheet:nth-child(2) .sheet-p', 'sheet text on white'), check('.sheet:nth-child(3) .sheet-p', 'sheet text on navy'),
+            check('.sheet:nth-child(5) .sheet-p', 'sheet text on ink'), check('.sheet-guides a', 'sheet guide link'), check('.opt', 'option button'), check('.topic-n', 'topic count'),
+            check('.stage figcaption p', 'stage text'), check('.foot-note', 'footer'), check('.foot-credit', 'credits'),
+            check('.cta', 'header button'), check('.top-link', 'header link'), check('.hero-sent', 'hero sentence'), check('.search-label', 'search label'), check('.hero .fine', 'search fine print'),
+            check('.askform label', 'form label'), check('.stop-note', 'contact note'), check('.contact-mail b', 'email display'), check('.lang', 'language button')];
   });
   contrast.forEach(c => c.skipped ? T(`contrast ${c.label}`, false, 'not found')
     : T(`contrast ${c.label}`, c.pass, `${c.ratio} vs ${c.need} at ${c.px}px`));

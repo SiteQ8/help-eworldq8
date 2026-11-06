@@ -100,10 +100,11 @@ def shell(title_en, title_ar, body, depth, description_en, rel=""):
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="top">
+<header class="top" id="top" data-field="paper">
   <div class="shell top-in">
     <a class="brand" href="{up}./" aria-label="eWorld Help">
-      <img src="{up}assets/img/logo.png" srcset="{up}assets/img/logo@2x.png 2x" alt="eWorld" width="520" height="101">
+      <img class="logo-dark" src="{up}assets/img/logo.png" srcset="{up}assets/img/logo@2x.png 2x" alt="eWorld" width="520" height="101">
+      <img class="logo-light" src="{up}assets/img/logo-white.png" alt="" aria-hidden="true" width="520" height="101">
       <span class="brand-help" data-t="brandHelp">Help</span>
     </a>
     <nav class="top-nav" aria-label="Primary">
@@ -114,24 +115,23 @@ def shell(title_en, title_ar, body, depth, description_en, rel=""):
   </div>
 </header>
 
-<main id="main">
+<main id="main" class="page ch" data-field="paper">
 {body}
 </main>
 
-<div class="band" aria-hidden="true"><div class="bars"><i></i><i></i><i></i></div></div>
-
-<footer class="foot">
+<footer class="ch foot" data-field="ink">
   <div class="shell">
-    <img class="foot-mark" src="{up}assets/img/logo-white.png" alt="eWorld" width="520" height="101" loading="lazy">
+    <nav class="mark" aria-label="Footer">
+      <a href="{up}guides/" data-t="navGuides">Guides</a>
+      <a href="{up}./#ask" data-t="askH">Two questions.</a>
+      <a href="{up}./#contact" data-t="askFormKicker">Ask us</a>
+    </nav>
     <div class="foot-grid">
-      <nav class="foot-links" aria-label="Footer">
-        <a href="{up}guides/" data-t="navGuides">Guides</a>
-        <a href="{up}./#ask" data-t="askH">Two questions.</a>
-        <a href="{up}./#contact" data-t="askFormKicker">Ask us</a>
-      </nav>
+      <img class="foot-logo" src="{up}assets/img/logo-white.png" alt="eWorld" width="520" height="101" loading="lazy">
       <p class="foot-note" data-t="footPlace">Online anywhere. In person by arrangement.</p>
     </div>
     <p class="foot-credit" id="credits"></p>
+    <p class="foot-copy">&copy; 2026 eWorld</p>
   </div>
 </footer>
 
