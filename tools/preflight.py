@@ -12,7 +12,8 @@ import pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEXT = {".html", ".css", ".js", ".md", ".txt", ".xml", ".json", ".yml", ".yaml", ".svg"}
-SKIP = {".git", "node_modules", ".taste-skill"}   # the design tool's working folder is not the site
+def local(part):   # dot folders other than .github are local state, not the site
+    return part == "node_modules" or (part.startswith(".") and part != ".github")
 DASHES = {"\u2012": "U+2012", "\u2013": "U+2013", "\u2014": "U+2014", "\u2015": "U+2015"}
 failures, notices = [], []
 
@@ -22,7 +23,7 @@ data = lambda: (ROOT / "assets" / "data.js").read_text(encoding="utf-8")
 
 def files():
     for p in sorted(ROOT.rglob("*")):
-        if p.is_file() and p.suffix.lower() in TEXT and not any(s in p.parts for s in SKIP):
+        if p.is_file() and p.suffix.lower() in TEXT and not any(local(part) for part in p.relative_to(ROOT).parts[:-1]):
             yield p
 
 
